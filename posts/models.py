@@ -2,8 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 
 class PostsManager(models.Manager):
-    def featured(self):
-        return super().get_queryset().filter(featured=True)
+    def featured(self, sources):
+        return super().get_queryset().filter(featured=True).filter(source__in=sources)
 
 # Create your models here.
 class Post(models.Model): 

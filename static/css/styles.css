@@ -55,7 +55,9 @@ body{
 }
 
 .scrap-option{
-  background-color: var(--mainAqua);
+  color: var(--mainWhite);
+  border: 1px solid var(--mainWhite);
+  cursor: pointer;
   padding: 0.2rem;
   text-align: center;
   font-family: 'Montserrat', sans-serif;
@@ -63,13 +65,25 @@ body{
   margin-bottom: 0.3rem;
 }
 
+.scrap-option:hover{
+  border: 1px solid var(--mainAqua);
+}
+
+.option-active{
+  background-color: rgba(39, 134, 163, 0.37);
+}
+
 .update-btn{
-  background-color: red;
-  border-radius: 20px;
+  background-color: var(--mainAqua);
+  border-radius: 5px;
   padding: 0.3em 0.5em;
   margin-top: auto;
   border: none;
-  color: var(--mainWhite);
+  color: var(--mainDark);
   font-family: 'Montserrat', sans-serif;
   font-size: 1.5rem;
+}
+
+.update-btn:hover{
+  background-color: greenyellow;
 }
