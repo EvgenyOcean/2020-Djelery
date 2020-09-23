@@ -124,3 +124,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),]
 
+
+# CELERY AND RABBITMQ
+CELERY_BROKER_URL = 'amqp://guest@192.168.99.100//'
+
