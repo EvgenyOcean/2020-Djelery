@@ -1,5 +1,49 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h1 class="alert alert-info">Hello From Home View</h1>
+  <main class="mt-4 px-4">
+    <div class="container">
+
+      <div class="row">
+        <div class="col-md-8 px-0">
+          <div class="informer mb-4 info-banner text-white align-center">TOP POSTS</div>
+        </div>
+        <div class="col-md-3 px-0 ml-auto">
+          <div class="informer mb-4 info-banner text-white align-center">SOURCES</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-8 content">
+          <div class="media mb-4">
+            <div class="media-body p-2 text-white">
+              <h5 class="mt-0 mb-2">Media heading</h5>
+              <p class="mb-2">Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.</p>
+              <a role="button" class="btn btn-light" href="#">Read More</a>
+            </div>
+          </div>
+          <div class="media mb-4">
+            <div class="media-body p-2 text-white">
+              <h5 class="mt-0 mb-2">Media heading</h5>
+              <p class="mb-2">Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.</p>
+              <a role="button" class="btn btn-light" href="#">Read More</a>
+            </div>
+          </div>
+          <div class="media mb-4">
+            <div class="media-body p-2 text-white">
+              <h5 class="mt-0 mb-2">Media heading</h5>
+              <p class="mb-2">Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.</p>
+              <a role="button" class="btn btn-light" href="#">Read More</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3 ml-auto left-side">
+          <div class="scrap-option">Habr</div>
+          <div class="scrap-option">VC</div>
+          <button class="update-btn" role="button">Update</button>
+        </div>
+      </div>
+    </div>
+  </main>
 {% endblock %}

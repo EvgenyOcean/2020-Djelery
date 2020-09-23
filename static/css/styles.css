@@ -1,0 +1,75 @@
+*, *::before, *::after{
+  box-sizing: border-box; 
+  padding: 0;
+  margin: 0;
+}
+
+/* 
+font-family: 'Bangers', cursive;
+font-family: 'Montserrat', sans-serif;
+*/
+
+body{
+  background: var(--mainBg);
+}
+
+:root{
+  --mainAqua: #00FFF0;
+  --mainWhite: #fff;
+  --mainBg: #2F195F;
+  --mainDark: #000;
+}
+
+.navbar{
+  background-color: var(--mainDark);
+}
+
+.navbar-brand{
+  font-family: 'Bangers', cursive;
+  font-size: 1.5rem;
+  color: var(--mainAqua);
+}
+
+.nav-link{
+  color: var(--mainAqua) !important;
+}
+
+/* HOME SECTON */
+.content{
+  background: rgba(0,0,0,0.2);
+}
+
+.info-banner{
+  background: var(--mainDark);
+  font-family: 'Montserrat', sans-serif;
+  text-align: center;
+  padding: 0.2rem;
+  font-size: 1.5rem;
+}
+
+.left-side{
+  background: rgba(0,0,0,0.2);
+  height: 250px;
+  display: flex;
+  flex-direction: column;
+}
+
+.scrap-option{
+  background-color: var(--mainAqua);
+  padding: 0.2rem;
+  text-align: center;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.5rem;
+  margin-bottom: 0.3rem;
+}
+
+.update-btn{
+  background-color: red;
+  border-radius: 20px;
+  padding: 0.3em 0.5em;
+  margin-top: auto;
+  border: none;
+  color: var(--mainWhite);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.5rem;
+}
