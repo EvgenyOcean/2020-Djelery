@@ -1,8 +1,8 @@
 from django.urls import path
-from .views import home
+from . import views
 
 app_name = 'posts'
 
 urlpatterns = [
-  path('', home, name='home'),
+  path('featured/', views.get_featured_posts, name='home'),
 ]

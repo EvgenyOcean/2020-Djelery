@@ -3,8 +3,11 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+from posts.views import home
+
 urlpatterns = [
-    path('', include('posts.urls')),
+    path('', home, name="home"),
+    path('api/posts/', include('posts.urls')),
     path('admin/', admin.site.urls),
 ]
 
