@@ -1,7 +1,7 @@
 <header>
   <nav class="navbar navbar-expand-md navbar-dark">
     <div class="container">
-      <a class="navbar-brand mr-4" href="#">DJELERY</a>
+      <a class="navbar-brand mr-4" href="{% url 'home' %}">DJELERY</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#datanav" aria-controls="datanav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -10,8 +10,13 @@
           <a class="nav-item nav-link" href="#">My Feed</a>
         </div>
         <div class="navbar-nav ml-auto">
-          <a class="nav-item nav-link" href="#">Register</a>
-          <a class="nav-item nav-link" href="#">Sign In</a>
+          {% if user.username %}
+            <a class="nav-item nav-link" href="{% url 'profile' %}">Profile</a>
+            <a class="nav-item nav-link" href="{% url 'logout' %}">Logout</a>
+          {% else %}
+            <a class="nav-item nav-link" href="{% url 'register' %}">Register</a>
+            <a class="nav-item nav-link" href="{% url 'login' %}">Sign In</a>
+          {% endif %}
         </div>
       </div>
     </div>

@@ -5,10 +5,10 @@ from django.db.models.signals import post_save
 # Create your models here.
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    habr_email = models.EmailField(unique=True)
-    habr_pass = models.CharField(max_length=250)
-    vs_email = models.EmailField(unique=True)
-    vc_pass = models.CharField(max_length=250)
+    habr_email = models.EmailField(blank=True)
+    habr_pass = models.CharField(max_length=250, blank=True)
+    vs_email = models.EmailField(blank=True)
+    vc_pass = models.CharField(max_length=250, blank=True)
 
     def __str__(self):
       representation = f'{self.user.username} Profile'

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+    <!-- CSS only -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+  <style>
+    :root, body, .container{
+      height: 100%;
+    }
+
+    body{
+      background-color: #2F195F;
+    }
+
+    .container{
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      margin-top: 0 !important;
+      margin-bottom: 0 !important;
+      min-height: 700px;
+    }
+
+    form{
+      background-color: #EFEFD0;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container mt-5">
+
+    {% if messages %}
+      {% for message in messages %}
+      <div class="row">
+        <div class="col-xs-10 col-lg-8 mx-auto">
+          <div class="alert alert-{{message.tags}}" role="alert">{{message}}</div>
+        </div>
+      </div>
+      {% endfor %}
+    {% endif %}
+
+    {% if form.non_field_errors %}
+      {% for err in form.non_field_errors %}
+      <div class="row">
+        <div class="col-xs-10 col-lg-8 mx-auto">
+          <div class="alert alert-danger" role="alert">{{err}}</div>
+        </div>
+      </div>
+      {% endfor %}
+    {% endif %}
+
+    {% if form.errors %}
+      {% for err in form.username.errors %}
+      <div class="row">
+        <div class="col-xs-10 col-lg-8 mx-auto">
+          <div class="alert alert-danger" role="alert">{{err}}</div>
+        </div>
+      </div>
+      {% endfor %}
+      {% for err in form.password.errors %}
+      <div class="row">
+        <div class="col-xs-10 col-lg-8 mx-auto">
+          <div class="alert alert-danger" role="alert">{{err}}</div>
+        </div>
+      </div>
+      {% endfor %}
+    {% endif %}
+    <div class="row">
+      <div class="col-xs-10 col-lg-8 mx-auto">
+        <form method="post" class="px-4 py-4 rounded-lg">
+          {% csrf_token %}
+          <fieldset class='form-group'>
+            <legend class="border-bottom mb-4">Welcome aboard!</legend>
+            <div class="form-group">
+              {{form.username.label_tag}}
+              {{form.username}}
+            </div>
+            <div class="form-group">
+              {{form.password.label_tag}}
+              {{form.password}}
+            </div>
+          </fieldset>
+          <button type="submit" class="btn btn-primary">Sign In</button>
+          <p class="border-top text-muted mt-2 mb-0">Don't have an account? <a href="{% url 'register' %}">Register here.</a></p>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    let form = document.forms[0]; 
+    let inputs = form.querySelectorAll('input');
+    inputs.forEach(input => {input.classList.add('form-control')});
+    inputs[1].placeholder = 'Enter your username';
+    inputs[2].placeholder = 'Enter your password';
+  </script>
+</body>
+</html>
+
+

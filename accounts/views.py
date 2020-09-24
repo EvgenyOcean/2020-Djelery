@@ -1,8 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from posts.models import Post
 from django.contrib.auth.models import User
-
+from django.contrib import messages
+from .forms import UserRegisterFrom
 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
@@ -18,6 +19,21 @@ from .tasks import user_scraping
 @login_required
 def profile(request):
     return render(request, 'accounts/account.html', {})
+
+def register(request):
+    if request.user.is_authenticated: 
+        return redirect('home')
+    if request.method == 'POST':
+        form = UserRegisterFrom(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            messages.success(request, f'Account for {username} has been created! You can log in!')
+            return redirect('/login')
+    else: 
+        form = UserRegisterFrom()
+    return render(request, 'accounts/register.html', {'form': form})
+
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
