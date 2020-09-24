@@ -35,6 +35,32 @@ def start_scraping():
     driver = webdriver.Chrome(chrome_options=chrome_options, executable_path=PATH)
 
 
+    driver.get("https://habr.com/ru/top/")
+
+
+    article_els = driver.find_elements_by_tag_name('article')
+    print(f'I found {len(article_els)} articles!')
+    an = driver.execute_script('return document.getElementsByTagName("article").length')
+    print(f'Js found {an} articles')
+    parse_received_data(article_els, 1)
+    driver.quit()
+    return 'Take it sloooww! Quite literally lol!'
+
+
+
+@shared_task
+def user_scraping():
+    PATH = "C:\Program Files (x86)\chromedriver.exe"
+    # PATH = '/usr/local/bin/chromedriver'
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument('--no-sandbox')
+    chrome_options.add_argument('--window-size=1920x1080')
+    chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--disable-gpu')
+
+    driver = webdriver.Chrome(chrome_options=chrome_options, executable_path=PATH)
+
+
     driver.get("https://account.habr.com/login/")
 
     # HANDLE SIGNING IN
@@ -74,13 +100,13 @@ def start_scraping():
     print(f'I found {len(article_els)} articles!')
     an = driver.execute_script('return document.getElementsByTagName("article").length')
     print(f'Js found {an} articles')
-    parse_received_data(article_els)
+    parse_received_data(article_els, 0)
     driver.quit()
     return 'Take it sloooww! Quite literally lol!'
 
-# do i need to use share task inhere?
+# do i need to use shared task inhere?
 @shared_task
-def parse_received_data(article_els):
+def parse_received_data(article_els, featured):
     articles = []
 
     print('Parsing received data...')
@@ -99,11 +125,11 @@ def parse_received_data(article_els):
             "link": link
         })
 
-    return save_results_db(articles)
+    return save_results_db(articles, featured)
 
-# do i need to use share task inhere?
+# do i need to use shared task inhere?
 @shared_task
-def save_results_db(articles):
+def save_results_db(articles, featured):
     print('starting saving')
     new_count = 0
 
@@ -113,7 +139,7 @@ def save_results_db(articles):
                 title = article['title'],
                 content = article['content'],
                 link = article['link'],
-                featured = 1,
+                featured = featured,
                 source = 'habr',
             )
             new_count += 1

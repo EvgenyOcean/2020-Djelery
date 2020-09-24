@@ -9,7 +9,7 @@ class PostsManager(models.Manager):
 class Post(models.Model): 
     title = models.CharField(max_length=250, blank=False, null=False)
     content = models.TextField()
-    link = models.CharField(max_length=250, blank=False, null=False)
+    link = models.CharField(max_length=250, blank=False, null=False, unique=True)
     source = models.CharField(max_length=25)
     featured = models.BooleanField(default=False)
     users = models.ManyToManyField(User, related_name='posts', null=True, blank=True)
