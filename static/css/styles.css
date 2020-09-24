@@ -87,3 +87,24 @@ body{
 .update-btn:hover{
   background-color: greenyellow;
 }
+
+/* PROFILE */
+.greetings, 
+.service-name{
+  font-size: 1.5rem; 
+  font-family: 'Montserrat', sans-serif;
+  color: var(--mainWhite);
+  padding: 0.2rem 0.5rem;
+  background-color: var(--mainDark);
+  text-transform: uppercase;
+}
+
+.service-name{
+  background-color: rgba(0,0,0,0.4);
+}
+
+.btn-success{
+  background-color: #00FF75!important;
+  color: var(--mainBg);
+  text-transform: uppercase;
+}

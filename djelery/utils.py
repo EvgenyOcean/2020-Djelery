@@ -1,30 +1,9 @@
-from __future__ import absolute_import, unicode_literals
-
-import time
-import json
-import os
-
-# Create your tasks here
-# shared_task does not depend on a particular project
-# thus it's good for reusability
-from celery import shared_task
-from .models import Post
 from django.db import IntegrityError
+from posts.models import Post
 
-### SCRAPING IMPORTS ###
-from datetime import datetime
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-###// SCRAPING IMPORTS ###
 
-
-# later on, add can be called in any view funciton
-# with .delay() method
-@shared_task
-def start_scraping():
+def run_browser():
     PATH = "C:\Program Files (x86)\chromedriver.exe"
     # PATH = '/usr/local/bin/chromedriver'
     chrome_options = webdriver.ChromeOptions()
@@ -34,22 +13,9 @@ def start_scraping():
     chrome_options.add_argument('--disable-gpu')
 
     driver = webdriver.Chrome(chrome_options=chrome_options, executable_path=PATH)
+    return driver
 
-
-    driver.get("https://habr.com/ru/top/")
-
-
-    article_els = driver.find_elements_by_tag_name('article')
-    print(f'I found {len(article_els)} articles!')
-    an = driver.execute_script('return document.getElementsByTagName("article").length')
-    print(f'Js found {an} articles')
-    parse_received_data(article_els, 1)
-    driver.quit()
-    return 'Take it sloooww! Quite literally lol!'
-
-# do i need to use shared task inhere?
-@shared_task
-def parse_received_data(article_els, featured):
+def parse_received_data(article_els, featured, user, source):
     articles = []
 
     print('Parsing received data...')
@@ -68,30 +34,31 @@ def parse_received_data(article_els, featured):
             "link": link
         })
 
-    return save_results_db(articles, featured)
+    return save_results_db(articles, featured, user, source)
 
-# do i need to use shared task inhere?
-@shared_task
-def save_results_db(articles, featured):
+def save_results_db(articles, featured, user, source):
     print('starting saving')
     new_count = 0
 
     for article in articles:
         try:
-            Post.objects.create(
+            p = Post.objects.create(
                 title = article['title'],
                 content = article['content'],
                 link = article['link'],
                 featured = featured,
-                source = 'habr',
+                source = source,
             )
+            p.users.add(user)
             new_count += 1
 
+        # UNIQUE CONSTRAIN MAY FAIL, MEANING I NEED TO SIMPLE ADD THE USER TO THE USERS
         except IntegrityError as err:
+            print('The aricle already exists, adding user...')
             article = Post.objects.filter(link=article['link']).first()
-            article.featured = True
-            article.save()
-
+            article.users.add(user)
+        
+        
         except Exception as e:
             print('Something went wrong, see error below')
             print(e)

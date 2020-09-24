@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <main>
+    <div class="container">
+      <div class="row mt-4">
+        <div class="col-md-10 mx-auto">
+          <div class="greetings mb-4">Hello, {{user.username}}</div>
+          <div class="services">
+            <div class="service mb-3">
+              <div class="service-name mb-2">Habr</div>
+                <form class="form-inline flex-column align-items-start ml-2">
+                  <input type="hidden" name="source" value="habr">
+                  <div class="form-group mb-2 px-0 mx-0 d-flex flex-column align-items-start">
+                    <label for="habr-email" class="text-white">Email:</label>
+                    <input type="email" class="form-control" id="habr-email" name="mailname" placeholder="Email">
+                  </div>
+                  <div class="form-group mb-2 px-0 mx-0 d-flex flex-column align-items-start">
+                    <label for="habr-password" class="text-white">Password:</label>
+                    <input type="password" class="form-control" id="habr-password" name="password" placeholder="Password">
+                  </div>
+                  <input type="submit" class="btn btn-success mb-2">Verify</input>
+                </form>
+            </div>
+            <div class="service mb-3">
+              <div class="service-name mb-2">VC</div>
+                <form class="form-inline flex-column align-items-start ml-2">
+                  <input type="hidden" name="source" value="vc">
+                  <div class="form-group mb-2 px-0 mx-0 d-flex flex-column align-items-start">
+                    <label for="vc-email" class="text-white">Email:</label>
+                    <input type="email" class="form-control" id="vc-email" name="mailname" placeholder="Email">
+                  </div>
+                  <div class="form-group mb-2 px-0 mx-0 d-flex flex-column align-items-start">
+                    <label for="vc-password" class="text-white">Password:</label>
+                    <input type="password" class="form-control" id="vc-password" name="password" placeholder="Password">
+                  </div>
+                  <input type="submit" class="btn btn-success mb-2">Verify</input>
+                </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    let forms = document.querySelectorAll('form');
+    forms.forEach(el => el.addEventListener('submit', verify_credentials));
+
+    function verify_credentials(e){
+      e.preventDefault();
+      let form = e.currentTarget; 
+      let source = form.id;
+      let formData = new FormData(form);
+      fetch('/api/accounts/verify_credentials/', {
+        method: "POST", 
+        headers: {
+          'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest',
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRFToken': getCookie('csrftoken'),
+        }, 
+        body: formData,
+      }).then(response => {
+        if (response.ok){ 
+          response.json().then(data => {
+            console.log(data);
+          }).catch(err => {console.log(err)})
+        } else {
+          response.json().then(errData => { 
+            console.log(errData);
+          }).catch(err => {console.log(err)})
+        }
+      }).catch(err => {console.log('never here, but just in case!')});
+    }
+
+
+    // UTILS 
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+              const cookie = cookies[i].trim();
+              // Does this cookie string begin with the name we want?
+              if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                  break;
+              }
+          }
+      }
+      return cookieValue;
+    }
+  </script>
+{% endblock %}
