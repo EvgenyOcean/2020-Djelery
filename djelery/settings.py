@@ -20,6 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
+# Yep, secret key is exposed, don't go with this one in production
 SECRET_KEY = '=*1l=j2u3#6r5gb(-ee%t1wjl%@(d4pw)^8jhmpgkyjgp1w7!y'
 ENCRYPT_KEY = b'fgF9EVEhVccCLONz37Q1xvCKO0gnNmHUoaIP7b1OI6U='
 
@@ -128,4 +129,5 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),]
 
 # CELERY AND RABBITMQ
 CELERY_BROKER_URL = 'amqp://guest@192.168.99.100//'
-
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_CACHE_BACKEND = 'django-cache'

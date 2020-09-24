@@ -9,6 +9,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
+from djelery.celery import app
 from .tasks import user_scraping
 
 
@@ -21,16 +22,22 @@ def profile(request):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def verify_credentials(request):
-    #I wanna get: 
-    #service and credintials for that service
-    #and go for scraping
-    #I wanna return: 
-    #selery task ID to track the status
-    # <QueryDict: {'source': ['vc'], 'email': ['evgeny.ocean@gmail.com'], 'password': ['fsdafas']}>
     mailname = request.data['mailname']
     password = request.data['password']
     source = request.data['source']
     current_username = request.user.username
-    user_scraping.delay(mailname, password, source, current_username)
+    task = user_scraping.delay(mailname, password, source, current_username)
 
-    return Response({"message": "all good"}, status=status.HTTP_202_ACCEPTED)
+    return Response({"task_id": task.task_id}, status=status.HTTP_202_ACCEPTED)
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def task_check(request):
+    print(f'task_check got: {request.data["task_id"]}')
+    task = app.AsyncResult(request.data['task_id'])
+    task_status = task.status
+    task_result = 'NOT DONE YET'
+    if (task_status == 'SUCCESS'):
+        task_result = task.get()
+    print(f'task_check is sending: status: {task_status}; result: {task_result}')
+    return Response({'status': task_status, 'result': task_result})
