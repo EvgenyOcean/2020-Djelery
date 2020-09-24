@@ -9,6 +9,7 @@ class PostsManager(models.Manager):
 class Post(models.Model): 
     title = models.CharField(max_length=250, blank=False, null=False)
     content = models.TextField()
+    full_content = models.TextField(blank=True)
     link = models.CharField(max_length=250, blank=False, null=False, unique=True)
     source = models.CharField(max_length=25)
     featured = models.BooleanField(default=False)

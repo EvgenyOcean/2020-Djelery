@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+  <main>
+    <div class="container">
+      <div class="row mt-4">
+        <div class="col-md-10 mx-auto d-flex flex-column">
+          <div class="d-none" id="post-id">{{post.id}}</div>
+          <div class="greetings mb-4 text-center">{{post.title}}</div>
+          <div class="content text-white p-3 mb-3 text-center">
+            <h3>Content is coming, soon will be here ;)</h3>
+            <img src="{% static 'contentLoading.svg' %}" alt="loading">
+          </div>
+          <a class="btn btn-dark my-4" href="#">BACK TO YOUR FEED</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    let postId = document.querySelector('#post-id').textContent;
+    fetch('/api/posts/detailed/', {
+        method: "POST", 
+        headers: {
+          'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest',
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRFToken': getCookie('csrftoken'),
+          'Content-Type': 'application/json',
+        }, 
+        body: JSON.stringify({"post_id": postId})
+      }).then(response => {
+        if (response.ok){ 
+          response.json().then(data => {
+            console.log(data);
+            let taskId = data['task_id'];
+            taskKeyName = 'task' + taskId.slice(0,8);
+            localStorage.setItem(taskKeyName, taskId);
+            taskController(taskKeyName, taskId);
+          }).catch(err => {console.log(err)})
+        } else {
+          response.json().then(errData => { //here we don't return anything just go straigh for then, if 400 or whatever
+            console.log(errData);
+          }).catch(err => {console.log(err)})
+        }
+      }).catch(err => {console.log('never here, but just in case!')});
+
+      function taskController(taskKeyName, taskId){
+        let timeoutID = setTimeout(function tick(){
+          console.log(taskId)
+          fetch('/api/accounts/task_check/', {
+            method: "POST",
+            headers: {
+              'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest',
+              'X-Requested-With': 'XMLHttpRequest',
+              'X-CSRFToken': getCookie('csrftoken'),
+              'Content-Type': 'application/json',
+            }, 
+            body: JSON.stringify({"task_id": taskId})
+          }).then(response => {
+            if (response.ok){ 
+              response.json().then(data => {
+                status = data['status'];
+                result = data['result'];
+                if (status === 'PENDING'){
+                  setTimeout(tick, 5000);
+                  console.log('task is pending, do nothing with the UI')
+                } else {
+                  clearTimeout(timeoutID);
+                  localStorage.removeItem(taskKeyName);
+                  console.log('task is done, localStorage cleared, next: updating UI')
+                  let contentDiv = document.querySelector('.content');
+                  contentDiv.innerHTML = '';
+                  contentDiv.textContent = result;
+                  contentDiv.classList.remove('text-center');
+                  contentDiv.classList.add('text-left');
+                }
+              }).catch(err => {console.log(err)})
+            } else {
+              response.json().then(errData => { 
+                console.log(errData);
+              }).catch(err => {console.log(err)})
+            }
+          }).catch(err => {console.log('never here, but just in case!')});
+        }, 1000)
+      }
+
+      function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+              const cookie = cookies[i].trim();
+              // Does this cookie string begin with the name we want?
+              if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                  break;
+              }
+          }
+      }
+      return cookieValue;
+    }
+  </script>
+{% endblock %}
+

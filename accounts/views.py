@@ -56,4 +56,4 @@ def task_check(request):
     if (task_status == 'SUCCESS'):
         task_result = task.get()
     print(f'task_check is sending: status: {task_status}; result: {task_result}')
-    return Response({'status': task_status, 'result': task_result})
+    return Response({'status': task_status, 'result': task_result}, status=status.HTTP_200_OK)

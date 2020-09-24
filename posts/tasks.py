@@ -3,6 +3,7 @@ from __future__ import absolute_import, unicode_literals
 import time
 import json
 import os
+import requests
 
 # Create your tasks here
 # shared_task does not depend on a particular project
@@ -18,6 +19,8 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+
+from bs4 import BeautifulSoup
 ###// SCRAPING IMPORTS ###
 
 
@@ -97,3 +100,31 @@ def save_results_db(articles, featured):
             print(e)
 
     return print(f'found {new_count} new articles')
+
+@shared_task
+def get_full_content(post_id):
+    post = Post.objects.filter(id=post_id).first()
+
+    if post.full_content:
+        print('Loading article from db!')
+        return post.full_content
+
+    link = post.link
+
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+    }
+
+    try:
+        r = requests.get(link, headers=headers)
+        soup = BeautifulSoup(r.content, 'lxml')
+        content_strings = soup.find('article', class_='post').stripped_strings
+        content = " ".join(list(content_strings))
+        post.full_content = content
+        post.save()
+    except: 
+        # idk some articles just don't load right
+        # should go with selenium here as well as a back up option
+        return 'Something went wrong, please consider reading original article by clicking Read More'
+
+    return content

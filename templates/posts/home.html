@@ -34,7 +34,7 @@
         mainEl.insertAdjacentHTML('afterbegin', '<h2 class="text-white">Nothing to fetch!</h2>')
         return;
       }
-      fetch('api/posts/featured/', {
+      fetch('/api/posts/featured/', {
         method: "POST", 
         headers: {
           'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest',
@@ -85,7 +85,7 @@
       for (let piece of data){
         let mediaDiv = document.createElement('div');
         let mediaBodyDiv = document.createElement('div');
-        let titleH5 = document.createElement('h5');
+        let titleH5 = document.createElement('a');
         let contentP = document.createElement('p');
         let linkA = document.createElement('a');
         mediaDiv.classList.add('media', 'mb-4');
@@ -94,9 +94,10 @@
         contentP.classList.add('mb-2');
         linkA.classList.add('btn', 'btn-light');
         titleH5.textContent = piece.title;
+        titleH5.setAttribute('href', '/posts/' + piece.id);
         contentP.textContent = piece.content; 
         linkA.setAttribute('href', piece.link);
-        linkA.innerText = 'Read More';
+        linkA.innerText = 'Read Original';
 
         mediaBodyDiv.append(titleH5, contentP, linkA)
         mediaDiv.append(mediaBodyDiv);
