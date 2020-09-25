@@ -25,6 +25,10 @@ from selenium.webdriver.support import expected_conditions as EC
 
 @shared_task
 def user_scraping(mailname, password, source, current_username):
+    '''
+    Получает данные для входа на сервис и сам сервис и username, 
+    Далее запускает browser и получает данные с ленты хабра
+    '''
     if not source in ['habr', 'vc']: 
         return 'Source is not available'
     driver = run_browser()

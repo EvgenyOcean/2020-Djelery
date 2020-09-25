@@ -106,6 +106,7 @@
 
     function handleNavBtns(e){
       e.preventDefault();
+      window.scrollTo(0,0);
       let sources = document.getElementsByClassName('option-active');
       sources = Array.from(sources);
       path = e.target.href;

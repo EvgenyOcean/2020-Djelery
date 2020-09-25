@@ -11,7 +11,7 @@ from .serializers import PostsSerializer
 
 from .tasks import start_scraping, get_full_content
 
-#paginator
+# User Feed Paginator
 def get_paginated_qs_response(qs, request):
     paginator = PageNumberPagination()
     paginator.page_size = 15
@@ -19,37 +19,40 @@ def get_paginated_qs_response(qs, request):
     seriazlier = PostsSerializer(paginated_qs, many=True)
     return paginator.get_paginated_response(seriazlier.data)
 
-# Create your views here.
+
 def home(request):    
     return render(request, 'posts/home.html', {})
 
+# MAIN VIEW FOR DETAILED POST
 def detailed(request, pk):
     # DONT FORGET TO MIGRATE
     post = get_object_or_404(Post, pk=pk)
     return render(request, 'posts/detailed.html', {'post': post})
 
+
+# MAIN VIEW FOR USER FEED
 def feed(request, username):
     # I'm not sure I want users to check
     # other user's feed
     if username != request.user.username: 
         return redirect('home')
-    user = get_object_or_404(User, username=username) #redundunt one
+    user = get_object_or_404(User, username=username) #redundant one
     users_post = user.posts.all()
     return render(request, 'posts/feed.html', {'posts': users_post})
 
+# EMULATING INITIAL SCRAPING
 def initial_scrap(request):
     start_scraping.delay()
-    # I gotta send cookies saying something like:
-    # "Yo, chill data is on its way"
-    # Then JS checks cookie, if its there make every 10sec request
-    # to the check task status API, once response is good
-    # JS refreshes the page with updated posts
     return redirect(home)
     
 
-# API VIEWS
+
 @api_view(['POST'])
 def get_featured_posts(request):
+    '''
+    Отправляет все статьи, которые на habr/top/ 
+    Чтобы не было пустой домашней страницы
+    '''
     # request.data and check for chosen sources
     try:
         featured_posts = Post.objects.featured(request.data['sources'])
@@ -63,6 +66,9 @@ def get_featured_posts(request):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def get_users_post(request):
+    '''
+    Отправляет только статьи с ленты определенного юзера
+    '''
     username = request.data['username']
     if username != request.user.username: 
         print('Not authorized')
@@ -72,8 +78,6 @@ def get_users_post(request):
         sources = request.data['sources']
         user = User.objects.filter(username=username).first()
         users_post = user.posts.filter(source__in=sources)
-        # serializer = PostsSerializer(users_post, many=True)
-        # print(serializer.data)
         return get_paginated_qs_response(users_post, request)
         # return Response(serializer.data, status=status.HTTP_200_OK)
     except: 
@@ -83,6 +87,9 @@ def get_users_post(request):
 
 @api_view(['POST'])
 def get_content(request):
+    '''
+    Загружает полный текст статьи с detailed.html
+    '''
     try:
         post_id = request.data['post_id']
         Post.objects.get(id=post_id)

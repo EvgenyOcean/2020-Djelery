@@ -32,8 +32,11 @@ from bs4 import BeautifulSoup
 # with .delay() method
 @shared_task
 def start_scraping():
-    PATH = "C:\Program Files (x86)\chromedriver.exe"
-    # PATH = '/usr/local/bin/chromedriver'
+    '''
+    Для заполнение домашней страницы, идет и берет 20 постов с habr/top
+    '''
+    # PATH = "C:\Program Files (x86)\chromedriver.exe"
+    PATH = '/usr/local/bin/chromedriver'
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--window-size=1920x1080')
@@ -57,6 +60,9 @@ def start_scraping():
 # do i need to use shared task inhere?
 @shared_task
 def parse_received_data(article_els, featured):
+    '''
+    Полученные данные в словарь, далее сохранить в дб
+    '''
     articles = []
 
     print('Parsing received data...')
@@ -65,7 +71,7 @@ def parse_received_data(article_els, featured):
         content = article.find_element_by_tag_name('div').find_element_by_class_name('post__text').text
         link = article.find_element_by_tag_name('h2').find_element_by_tag_name('a').get_attribute('href')
         
-        # replacer does not work, gotta use regex for /n/n and /n/n/n/n cases
+        # it appears to be working
         content.replace('/n', ' ')
     
         # here you should go with your db
@@ -80,6 +86,9 @@ def parse_received_data(article_els, featured):
 # do i need to use shared task inhere?
 @shared_task
 def save_results_db(articles, featured):
+    '''
+    Сохраняет полученные статьи в db
+    '''
     print('starting saving')
     new_count = 0
 
@@ -107,6 +116,9 @@ def save_results_db(articles, featured):
 
 @shared_task
 def get_full_content(post_id):
+    '''
+    Получает полный текст статьи
+    '''
     post = Post.objects.filter(id=post_id).first()
 
     if post.full_content:
@@ -135,6 +147,9 @@ def get_full_content(post_id):
 
 @shared_task
 def start_scraping_beat():
+    '''
+    Задание, чтобы каждые 24 часа обновлять ленту пользователя
+    '''
     # should get all the services in the arr
     # cuz if services grow, then ifs will grow as well
     users = User.objects.all()
@@ -152,6 +167,5 @@ def start_scraping_beat():
         if user.profile.vc_pass:
             # start vs scraping
             pass
-
 
     return 'Main Beat finished, waiting for subtasks'

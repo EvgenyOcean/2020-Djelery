@@ -38,6 +38,11 @@ def register(request):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def verify_credentials(request):
+    '''
+    Как только юзер вводит данные в profile, они приходят сюда
+    и начинается парсинг контента; если удалось пройти habr
+    authentication, тогда (mailname - это email or username зависит от сервиса)
+    '''
     mailname = request.data['mailname']
     password = request.data['password']
     source = request.data['source']
@@ -49,6 +54,10 @@ def verify_credentials(request):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def task_check(request):
+    '''
+    AJAX реквесты, чтобы посмотреть что там по статусу задания, 
+    и если что обновить UI/redirect туда куда нужно
+    '''
     print(f'task_check got: {request.data["task_id"]}')
     task = app.AsyncResult(request.data['task_id'])
     task_status = task.status
