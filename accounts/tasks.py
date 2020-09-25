@@ -39,6 +39,8 @@ def user_scraping(mailname, password, source, current_username):
         return 'The user does not exist o_O'
     user = user.first()
 
+    # HABR SCRAPING SECTION # # HABR SCRAPING SECTION ## HABR SCRAPING SECTION #
+
     # HANDLE SIGNING IN
     email = driver.find_element_by_name('email')
     email.send_keys(mailname)
@@ -92,6 +94,8 @@ def user_scraping(mailname, password, source, current_username):
     except: 
         return 'Wasn\'t able to get to the feed page'
 
+    # VC SCRAPING SECTION # # VC SCRAPING SECTION ## VC SCRAPING SECTION #
+    
 
     #everything seems to be correct => saving service pass and email
     try:

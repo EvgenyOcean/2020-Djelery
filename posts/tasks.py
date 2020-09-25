@@ -8,9 +8,13 @@ import requests
 # Create your tasks here
 # shared_task does not depend on a particular project
 # thus it's good for reusability
-from celery import shared_task
-from .models import Post
+from django.contrib.auth.models import User
 from django.db import IntegrityError
+from .models import Post
+
+from celery import shared_task
+from accounts.tasks import user_scraping
+from accounts.utils import decrypt_pw_hash
 
 ### SCRAPING IMPORTS ###
 from datetime import datetime
@@ -28,8 +32,8 @@ from bs4 import BeautifulSoup
 # with .delay() method
 @shared_task
 def start_scraping():
-    # PATH = "C:\Program Files (x86)\chromedriver.exe"
-    PATH = '/usr/local/bin/chromedriver'
+    PATH = "C:\Program Files (x86)\chromedriver.exe"
+    # PATH = '/usr/local/bin/chromedriver'
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--window-size=1920x1080')
@@ -131,5 +135,23 @@ def get_full_content(post_id):
 
 @shared_task
 def start_scraping_beat():
-    start_scraping.delay()
-    return 'Main Beat finished, waiting for scraper'
+    # should get all the services in the arr
+    # cuz if services grow, then ifs will grow as well
+    users = User.objects.all()
+    for user in users:
+        # I need to find if user has vc and habr credentials 
+        if user.profile.habr_pass:
+            print('Scraping for a specific user now!')
+            # start habr scraping
+            mailname = user.profile.habr_email
+            password = decrypt_pw_hash(user.profile.habr_pass)
+            source = 'habr'
+            current_username = user.username
+            # print(password, mailname, source, current_username)
+            user_scraping.delay(mailname, password, source, current_username)
+        if user.profile.vc_pass:
+            # start vs scraping
+            pass
+
+
+    return 'Main Beat finished, waiting for subtasks'
