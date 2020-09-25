@@ -21,12 +21,31 @@
           <button class="update-btn" role="button">Update</button>
         </div>
       </div>
+
+      <div class="row">
+        <nav aria-label="Page navigation example">
+          <ul class="pagination justify-content-center">
+            <li class="page-item disabled">
+              <a class="page-link btn-nav prev" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+            </li>
+            <li class="page-item">
+              <a class="page-link btn-nav next" href="#">Next</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
     </div>
   </main>
 
   <script>
     let username = document.querySelector('[data-username]').dataset['username'];
-    function fetch_users_post(sources=['habr', 'vc']){
+    function fetch_users_post(path, sources=['habr', 'vc']){
+      console.log(path);
+      if (!path){
+        path = '/api/posts/user-posts/';
+      } else {
+
+      }
       let userDiv = document.querySelector('[data-username]');
 
       if (sources.length === 0){
@@ -35,7 +54,7 @@
         mainEl.insertAdjacentHTML('afterbegin', '<h2 class="text-white">Nothing to fetch!</h2>')
         return;
       }
-      fetch('/api/posts/user-posts/', {
+      fetch(path, {
         method: "POST", 
         headers: {
           'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest',
@@ -48,7 +67,28 @@
         if (response.ok){ 
           response.json().then(data => {
             console.log(data);
-            create_html(data);
+            let next = data.next;
+            let prev = data.previous;
+            let nextEl = document.querySelector('.next');
+            let prevEl = document.querySelector('.prev');
+            // if next is null
+            if (!next){
+              nextEl.setAttribute('aria-disabled', 'true');
+              nextEl.parentElement.classList.add('disabled');
+            } else {
+              nextEl.removeAttribute('aria-disabled');
+              nextEl.parentElement.classList.remove('disabled');
+              nextEl.href = next;
+            }
+            if (!prev){
+              prevEl.setAttribute('aria-disabled', 'true');
+              prevEl.parentElement.classList.add('disabled');
+            } else {
+              prevEl.removeAttribute('aria-disabled');
+              prevEl.parentElement.classList.remove('disabled');
+              prevEl.href = prev;
+            }
+            create_html(data.results);
           }).catch(err => {console.log(err)})
         } else {
           response.json().then(errData => { //here we don't return anything just go straigh for then, if 400 or whatever
@@ -61,6 +101,17 @@
     // habr posts are fetched by feault, can be discarded though
     fetch_users_post();
 
+    // handle next or prev click 
+    let navBtns = document.querySelectorAll('.btn-nav').forEach(el => {el.onclick = handleNavBtns});
+
+    function handleNavBtns(e){
+      e.preventDefault();
+      let sources = document.getElementsByClassName('option-active');
+      sources = Array.from(sources);
+      path = e.target.href;
+      fetch_users_post(path, sources.map(el => el.dataset['source']));
+    }
+
     // handle update click
     function handleSourcesClick(e){
       let target = e.target;
@@ -69,7 +120,7 @@
         console.log('update btn has been clicked');
         let sources = document.getElementsByClassName('option-active');
         sources = Array.from(sources);
-        fetch_users_post(sources.map(el => el.dataset['source']));
+        fetch_users_post(null, sources.map(el => el.dataset['source']));
       } else if (target.classList.contains('scrap-option')){
         target.classList.toggle('option-active');
       }
@@ -96,7 +147,7 @@
         linkA.classList.add('btn', 'btn-light');
         titleH5.textContent = piece.title;
         titleH5.setAttribute('href', '/posts/' + piece.id);
-        contentP.textContent = piece.content; 
+        contentP.textContent = piece.content.slice(0, 700); 
         linkA.setAttribute('href', piece.link);
         linkA.innerText = 'Read Original';
 

@@ -95,7 +95,7 @@
         linkA.classList.add('btn', 'btn-light');
         titleH5.textContent = piece.title;
         titleH5.setAttribute('href', '/posts/' + piece.id);
-        contentP.textContent = piece.content; 
+        contentP.textContent = piece.content.slice(0, 700); 
         linkA.setAttribute('href', piece.link);
         linkA.innerText = 'Read Original';
 

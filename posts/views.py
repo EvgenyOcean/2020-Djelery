@@ -6,10 +6,18 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.pagination import PageNumberPagination
 from .serializers import PostsSerializer
 
 from .tasks import start_scraping, get_full_content
 
+#paginator
+def get_paginated_qs_response(qs, request):
+    paginator = PageNumberPagination()
+    paginator.page_size = 15
+    paginated_qs = paginator.paginate_queryset(qs, request)
+    seriazlier = PostsSerializer(paginated_qs, many=True)
+    return paginator.get_paginated_response(seriazlier.data)
 
 # Create your views here.
 def home(request):    
@@ -50,6 +58,7 @@ def get_featured_posts(request):
     except: 
         return Response({"message": "Source does not exist!"}, status=status.HTTP_200_OK)
 
+
 # API VIEWS
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -63,9 +72,10 @@ def get_users_post(request):
         sources = request.data['sources']
         user = User.objects.filter(username=username).first()
         users_post = user.posts.filter(source__in=sources)
-        serializer = PostsSerializer(users_post, many=True)
-        print(serializer.data)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        # serializer = PostsSerializer(users_post, many=True)
+        # print(serializer.data)
+        return get_paginated_qs_response(users_post, request)
+        # return Response(serializer.data, status=status.HTTP_200_OK)
     except: 
         # gotta look up a correct status
         return Response({"message": "Something went wrong!"}, status=status.HTTP_204_NO_CONTENT)
@@ -82,3 +92,4 @@ def get_content(request):
 
     except:
         return Response({"message": "Post does not exist!"})
+
