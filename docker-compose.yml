@@ -47,7 +47,7 @@ services:
       # experimental to avoid chrome crashes
       - /dev/shm:/dev/shm
       - djelery:/djelery
-    command: celery -A dj_celery --autoscale=10,3 worker -l INFO
+    command: celery -A djelery --autoscale=10,3 worker -l INFO
     # ports: []
     depends_on: 
       - rabbitmq
@@ -58,7 +58,7 @@ services:
     container_name: beaterick
     volumes:
       - djelery:/djelery
-    command: celery -A dj_celery beat -l INFO
+    command: celery -A djelery beat -l INFO
     depends_on: 
       - rabbitmq
       - db
