@@ -39,9 +39,9 @@ def register(request):
 @permission_classes([IsAuthenticated])
 def verify_credentials(request):
     '''
-    Как только юзер вводит данные в profile, они приходят сюда
-    и начинается парсинг контента; если удалось пройти habr
-    authentication, тогда (mailname - это email or username зависит от сервиса)
+    Once user enters credential on profile page, it comes right here
+    and parsing starts; if habr login successfull then 
+    (mailname - is mail or username depending on a server)
     '''
     mailname = request.data['mailname']
     password = request.data['password']
@@ -55,8 +55,8 @@ def verify_credentials(request):
 @permission_classes([IsAuthenticated])
 def task_check(request):
     '''
-    AJAX реквесты, чтобы посмотреть что там по статусу задания, 
-    и если что обновить UI/redirect туда куда нужно
+    AJAX requests to check the task status
+    and accordingly update the UI
     '''
     print(f'task_check got: {request.data["task_id"]}')
     task = app.AsyncResult(request.data['task_id'])

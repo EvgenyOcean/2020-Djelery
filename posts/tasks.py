@@ -33,7 +33,7 @@ from bs4 import BeautifulSoup
 @shared_task
 def start_scraping():
     '''
-    Для заполнение домашней страницы, идет и берет 20 постов с habr/top
+    To fill in the home page, take first 20 posts from habr
     '''
     # PATH = "C:\Program Files (x86)\chromedriver.exe"
     PATH = '/usr/local/bin/chromedriver'
@@ -61,7 +61,7 @@ def start_scraping():
 @shared_task
 def parse_received_data(article_els, featured):
     '''
-    Полученные данные в словарь, далее сохранить в дб
+    To parse data into the dict
     '''
     articles = []
 
@@ -87,7 +87,7 @@ def parse_received_data(article_els, featured):
 @shared_task
 def save_results_db(articles, featured):
     '''
-    Сохраняет полученные статьи в db
+    Saves the articles into the db
     '''
     print('starting saving')
     new_count = 0
@@ -117,7 +117,7 @@ def save_results_db(articles, featured):
 @shared_task
 def get_full_content(post_id):
     '''
-    Получает полный текст статьи
+    Gets full content of the article
     '''
     post = Post.objects.filter(id=post_id).first()
 
@@ -148,7 +148,7 @@ def get_full_content(post_id):
 @shared_task
 def start_scraping_beat():
     '''
-    Задание, чтобы каждые 24 часа обновлять ленту пользователя
+    Celery task, updating the feed every 24 hours
     '''
     # should get all the services in the arr
     # cuz if services grow, then ifs will grow as well

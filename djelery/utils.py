@@ -5,7 +5,7 @@ from selenium import webdriver
 
 def run_browser():
     '''
-    Запускает браузер
+    runs the browser
     '''
     # PATH = "C:\Program Files (x86)\chromedriver.exe"
     PATH = '/usr/local/bin/chromedriver'
@@ -21,7 +21,7 @@ def run_browser():
 
 def save_results_db(articles, featured, user, source):
     '''
-    Сохраняет результаты в дб
+    saves results to the db
     '''
     print('starting saving')
     new_count = 0

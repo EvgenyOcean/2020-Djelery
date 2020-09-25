@@ -50,8 +50,8 @@ def initial_scrap(request):
 @api_view(['POST'])
 def get_featured_posts(request):
     '''
-    Отправляет все статьи, которые на habr/top/ 
-    Чтобы не было пустой домашней страницы
+    Send all the articles form habr/top
+    To populate home page
     '''
     # request.data and check for chosen sources
     try:
@@ -67,7 +67,7 @@ def get_featured_posts(request):
 @permission_classes([IsAuthenticated])
 def get_users_post(request):
     '''
-    Отправляет только статьи с ленты определенного юзера
+    Send only user-specific articles
     '''
     username = request.data['username']
     if username != request.user.username: 
@@ -88,7 +88,7 @@ def get_users_post(request):
 @api_view(['POST'])
 def get_content(request):
     '''
-    Загружает полный текст статьи с detailed.html
+    Loads complete article text
     '''
     try:
         post_id = request.data['post_id']

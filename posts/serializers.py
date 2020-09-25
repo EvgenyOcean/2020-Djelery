@@ -4,7 +4,7 @@ from .models import Post
 
 class PostsSerializer(serializers.ModelSerializer):
     '''
-    Принимает посты => сериализует => that's all she wrote
+    gets posts => serializes => that's all she wrote
     '''
     class Meta:
         model = Post 
