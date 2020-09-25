@@ -47,7 +47,9 @@ services:
       # experimental to avoid chrome crashes
       - /dev/shm:/dev/shm
       - djelery:/djelery
-    command: celery -A djelery --autoscale=10,3 worker -l INFO
+    # for some reason it says there's no such option as --autoscale
+    # command: celery -A djelery --autoscale=10,3 worker -l INFO
+    command: celery -A djelery worker -l INFO
     # ports: []
     depends_on: 
       - rabbitmq
