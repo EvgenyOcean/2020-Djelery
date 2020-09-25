@@ -10,7 +10,7 @@ COPY . /djelery
 WORKDIR /djelery
 
 # https://pipenv-fork.readthedocs.io/en/latest/basics.html#pipenv-install
-RUN pip install --upgrade pip && pip install pipenv && pipenv install --skip-lock --system --dev
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
 # install google chrome
 RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
