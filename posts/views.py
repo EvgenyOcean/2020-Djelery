@@ -1,9 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.models import User
 from .models import Post
 
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from .serializers import PostsSerializer
 
 from .tasks import start_scraping, get_full_content
@@ -18,7 +20,16 @@ def detailed(request, pk):
     post = get_object_or_404(Post, pk=pk)
     return render(request, 'posts/detailed.html', {'post': post})
 
-def initla_scrap(request):
+def feed(request, username):
+    # I'm not sure I want users to check
+    # other user's feed
+    if username != request.user.username: 
+        return redirect('home')
+    user = get_object_or_404(User, username=username) #redundunt one
+    users_post = user.posts.all()
+    return render(request, 'posts/feed.html', {'posts': users_post})
+
+def initial_scrap(request):
     start_scraping.delay()
     # I gotta send cookies saying something like:
     # "Yo, chill data is on its way"
@@ -38,6 +49,27 @@ def get_featured_posts(request):
         return Response(serializer.data, status=status.HTTP_200_OK)
     except: 
         return Response({"message": "Source does not exist!"}, status=status.HTTP_200_OK)
+
+# API VIEWS
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def get_users_post(request):
+    username = request.data['username']
+    if username != request.user.username: 
+        print('Not authorized')
+        return Response({"message": "Not authorized!"}, status=status.HTTP_401_UNAUTHORIZED)
+    try:
+        print('Everything is smooth!')
+        sources = request.data['sources']
+        user = User.objects.filter(username=username).first()
+        users_post = user.posts.filter(source__in=sources)
+        serializer = PostsSerializer(users_post, many=True)
+        print(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except: 
+        # gotta look up a correct status
+        return Response({"message": "Something went wrong!"}, status=status.HTTP_204_NO_CONTENT)
+
 
 @api_view(['POST'])
 def get_content(request):

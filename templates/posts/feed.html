@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <main class="mt-4 px-4">
+    <div class="container">
+      <div class="d-none" data-username="{{user.username}}"></div>
+      <div class="row">
+        <div class="col-md-8 px-0">
+          <div class="informer mb-4 info-banner text-white align-center">POSTS</div>
+        </div>
+        <div class="col-md-3 px-0 ml-auto">
+          <div class="informer mb-4 info-banner text-white align-center">SOURCES</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-8 content">Please, wait. Posts are loading.</div>
+        <div class="col-md-3 ml-auto left-side">
+          <div class="scrap-option option-active" data-source='habr'>Habr</div>
+          <div class="scrap-option" data-source='vc'>VC</div>
+          <button class="update-btn" role="button">Update</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    let username = document.querySelector('[data-username]').dataset['username'];
+    function fetch_users_post(sources=['habr', 'vc']){
+      let userDiv = document.querySelector('[data-username]');
+
+      if (sources.length === 0){
+        let mainEl = document.body.querySelector('.content');
+        mainEl.innerHTML = '';
+        mainEl.insertAdjacentHTML('afterbegin', '<h2 class="text-white">Nothing to fetch!</h2>')
+        return;
+      }
+      fetch('/api/posts/user-posts/', {
+        method: "POST", 
+        headers: {
+          'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest',
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRFToken': getCookie('csrftoken'),
+          'Content-Type': 'application/json',
+        }, 
+        body: JSON.stringify({"sources": sources, "username": username})
+      }).then(response => {
+        if (response.ok){ 
+          response.json().then(data => {
+            console.log(data);
+            create_html(data);
+          }).catch(err => {console.log(err)})
+        } else {
+          response.json().then(errData => { //here we don't return anything just go straigh for then, if 400 or whatever
+            console.log(errData);
+          }).catch(err => {console.log(err)})
+        }
+      }).catch(err => {console.log('never here, but just in case!')});
+    }
+
+    // habr posts are fetched by feault, can be discarded though
+    fetch_users_post();
+
+    // handle update click
+    function handleSourcesClick(e){
+      let target = e.target;
+      // time to update with new sources
+      if (target.classList.contains('update-btn')){
+        console.log('update btn has been clicked');
+        let sources = document.getElementsByClassName('option-active');
+        sources = Array.from(sources);
+        fetch_users_post(sources.map(el => el.dataset['source']));
+      } else if (target.classList.contains('scrap-option')){
+        target.classList.toggle('option-active');
+      }
+    }
+
+    let sourcesDiv = document.body.querySelector('.left-side');
+    sourcesDiv.onclick = handleSourcesClick;
+
+
+    // SOME UTILS FUNCTIONS
+    function create_html(data){
+      let mainEl = document.body.querySelector('.content');
+      mainEl.innerHTML = '';
+      for (let piece of data){
+        let mediaDiv = document.createElement('div');
+        let mediaBodyDiv = document.createElement('div');
+        let titleH5 = document.createElement('a');
+        let contentP = document.createElement('p');
+        let linkA = document.createElement('a');
+        mediaDiv.classList.add('media', 'mb-4');
+        mediaBodyDiv.classList.add('media-body', 'p-2', 'text-white');
+        titleH5.classList.add('mb-2');
+        contentP.classList.add('mb-2');
+        linkA.classList.add('btn', 'btn-light');
+        titleH5.textContent = piece.title;
+        titleH5.setAttribute('href', '/posts/' + piece.id);
+        contentP.textContent = piece.content; 
+        linkA.setAttribute('href', piece.link);
+        linkA.innerText = 'Read Original';
+
+        mediaBodyDiv.append(titleH5, contentP, linkA)
+        mediaDiv.append(mediaBodyDiv);
+        mainEl.append(mediaDiv);
+      }
+    }
+
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+              const cookie = cookies[i].trim();
+              // Does this cookie string begin with the name we want?
+              if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                  break;
+              }
+          }
+      }
+      return cookieValue;
+    }
+  </script>
+{% endblock %}

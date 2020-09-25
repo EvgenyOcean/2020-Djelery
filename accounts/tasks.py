@@ -22,8 +22,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 ###// SCRAPING IMPORTS ###
 
-# TO DO: 
-# 1. Tasks should be saved in db to check their status later
 
 @shared_task
 def user_scraping(mailname, password, source, current_username):
@@ -65,16 +63,13 @@ def user_scraping(mailname, password, source, current_username):
 
     try:
         articles = []
-        for i in range(1, 51):
+        for i in range(1, 4):
             try:
                 url = f'https://habr.com/ru/feed/page{i}/'
                 driver.get(url)
                 WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.TAG_NAME, "article")))
                 article_els = driver.find_elements_by_tag_name('article')
                 print(f'scraping in {url}')
-                # print(f'I found {len(article_els)} articles!')
-                # an = driver.execute_script('return document.getElementsByTagName("article").length')
-                # print(f'Js found {an} articles')
 
                 # parsing data
                 for article in article_els:
@@ -82,10 +77,10 @@ def user_scraping(mailname, password, source, current_username):
                     content = article.find_element_by_tag_name('div').find_element_by_class_name('post__text').text
                     link = article.find_element_by_tag_name('h2').find_element_by_tag_name('a').get_attribute('href')
                 
-                # replacer does not work, gotta use regex for /n/n and /n/n/n/n cases
+                    # content looks like shit though, consider adding innerHTML or whatever
+                    # to render it prettier
                     content.replace('/n', ' ')
                 
-                    # here you should go with your db
                     articles.append({
                         "title": header,
                         "content": content,
@@ -109,15 +104,7 @@ def user_scraping(mailname, password, source, current_username):
     except: 
         return 'Something went wrong with saving creds'
     
-    # you need to find a way to wait for a page to load
-    # i think 1sec is too expensive, but will do for now
-    # time.sleep(1)
 
-    # article_els = driver.find_elements_by_tag_name('article')
-    # print(f'I found {len(article_els)} articles!')
-    # an = driver.execute_script('return document.getElementsByTagName("article").length')
-    # print(f'Js found {an} articles')
-    # parse_received_data(article_els, 0, user, source)
     print('Scraping down, time to save \'em all!')
     save_results_db(articles, 0, user, source)
     driver.quit()
