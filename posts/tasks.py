@@ -28,8 +28,8 @@ from bs4 import BeautifulSoup
 # with .delay() method
 @shared_task
 def start_scraping():
-    PATH = "C:\Program Files (x86)\chromedriver.exe"
-    # PATH = '/usr/local/bin/chromedriver'
+    # PATH = "C:\Program Files (x86)\chromedriver.exe"
+    PATH = '/usr/local/bin/chromedriver'
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--window-size=1920x1080')
