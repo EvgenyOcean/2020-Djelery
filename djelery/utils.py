@@ -15,26 +15,26 @@ def run_browser():
     driver = webdriver.Chrome(chrome_options=chrome_options, executable_path=PATH)
     return driver
 
-def parse_received_data(article_els, featured, user, source):
-    articles = []
+# def parse_received_data(article_els, featured, user, source):
+#     articles = []
 
-    print('Parsing received data...')
-    for article in article_els:
-        header = article.find_element_by_tag_name('h2').find_element_by_tag_name('a').text
-        content = article.find_element_by_tag_name('div').find_element_by_class_name('post__text').text
-        link = article.find_element_by_tag_name('h2').find_element_by_tag_name('a').get_attribute('href')
+#     print('Parsing received data...')
+#     for article in article_els:
+#         header = article.find_element_by_tag_name('h2').find_element_by_tag_name('a').text
+#         content = article.find_element_by_tag_name('div').find_element_by_class_name('post__text').text
+#         link = article.find_element_by_tag_name('h2').find_element_by_tag_name('a').get_attribute('href')
         
-        # replacer does not work, gotta use regex for /n/n and /n/n/n/n cases
-        content.replace('/n', ' ')
+#         # replacer does not work, gotta use regex for /n/n and /n/n/n/n cases
+#         content.replace('/n', ' ')
     
-        # here you should go with your db
-        articles.append({
-            "title": header,
-            "content": content,
-            "link": link
-        })
+#         # here you should go with your db
+#         articles.append({
+#             "title": header,
+#             "content": content,
+#             "link": link
+#         })
 
-    return save_results_db(articles, featured, user, source)
+#     return save_results_db(articles, featured, user, source)
 
 def save_results_db(articles, featured, user, source):
     print('starting saving')

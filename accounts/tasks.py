@@ -9,7 +9,7 @@ import os
 # thus it's good for reusability
 from django.contrib.auth.models import User
 from posts.models import Post
-from djelery.utils import run_browser, parse_received_data
+from djelery.utils import run_browser, save_results_db
 from .utils import generate_pw_hash
 
 ### CELERY IMPORTS ###
@@ -64,14 +64,36 @@ def user_scraping(mailname, password, source, current_username):
         return 'Credentials are incorrect OR recaptcha appeared'
 
     try:
-        try:
-            feed_link = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.LINK_TEXT, "Моя лента")))
-            feed_link.click()
-            print('Im in')
-        except:
-            feed_link = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.LINK_TEXT, "My feed")))
-            feed_link.click()
-            print('Im in')
+        articles = []
+        for i in range(1, 51):
+            try:
+                url = f'https://habr.com/ru/feed/page{i}/'
+                driver.get(url)
+                WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.TAG_NAME, "article")))
+                article_els = driver.find_elements_by_tag_name('article')
+                print(f'scraping in {url}')
+                # print(f'I found {len(article_els)} articles!')
+                # an = driver.execute_script('return document.getElementsByTagName("article").length')
+                # print(f'Js found {an} articles')
+
+                # parsing data
+                for article in article_els:
+                    header = article.find_element_by_tag_name('h2').find_element_by_tag_name('a').text
+                    content = article.find_element_by_tag_name('div').find_element_by_class_name('post__text').text
+                    link = article.find_element_by_tag_name('h2').find_element_by_tag_name('a').get_attribute('href')
+                
+                # replacer does not work, gotta use regex for /n/n and /n/n/n/n cases
+                    content.replace('/n', ' ')
+                
+                    # here you should go with your db
+                    articles.append({
+                        "title": header,
+                        "content": content,
+                        "link": link
+                    })
+
+            except: 
+                print(f'DOES NOT EXIST: /page{i}/')
     except: 
         return 'Wasn\'t able to get to the feed page'
 
@@ -89,12 +111,14 @@ def user_scraping(mailname, password, source, current_username):
     
     # you need to find a way to wait for a page to load
     # i think 1sec is too expensive, but will do for now
-    time.sleep(1)
+    # time.sleep(1)
 
-    article_els = driver.find_elements_by_tag_name('article')
-    print(f'I found {len(article_els)} articles!')
-    an = driver.execute_script('return document.getElementsByTagName("article").length')
-    print(f'Js found {an} articles')
-    parse_received_data(article_els, 0, user, source)
+    # article_els = driver.find_elements_by_tag_name('article')
+    # print(f'I found {len(article_els)} articles!')
+    # an = driver.execute_script('return document.getElementsByTagName("article").length')
+    # print(f'Js found {an} articles')
+    # parse_received_data(article_els, 0, user, source)
+    print('Scraping down, time to save \'em all!')
+    save_results_db(articles, 0, user, source)
     driver.quit()
     return 'Done!'
