@@ -128,3 +128,8 @@ def get_full_content(post_id):
         return 'Something went wrong, please consider reading original article by clicking Read More'
 
     return content
+
+@shared_task
+def start_scraping_beat():
+    start_scraping.delay()
+    return 'Main Beat finished, waiting for scraper'

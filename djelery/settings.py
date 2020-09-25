@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
 from pathlib import Path
+from celery.schedules import crontab
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -27,6 +28,7 @@ ENCRYPT_KEY = b'fgF9EVEhVccCLONz37Q1xvCKO0gnNmHUoaIP7b1OI6U='
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# CONFIGURE ALLOWED_HOST WITH YOUR VIRTUAL MACHINE IP
 ALLOWED_HOSTS = ['192.168.99.100', 'localhost', '127.0.0.1']
 
 
@@ -79,10 +81,22 @@ WSGI_APPLICATION = 'djelery.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'postgress',
+        'USER': 'postgress',
+        'PASSWORD': 'postgress',
+        # change the host to the container name
+        'HOST': 'postick',
+        'PORT': 5432,
     }
 }
 
@@ -134,6 +148,14 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),]
 
 
 # CELERY AND RABBITMQ
-CELERY_BROKER_URL = 'amqp://guest@192.168.99.100//'
+CELERY_BROKER_URL = 'amqp://guest@rabbick//'
+# CELERY_BROKER_URL = 'amqp://guest@192.168.99.100//'
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_CACHE_BACKEND = 'django-cache'
+
+CELERY_BEAT_SCHEDULE = {
+    'start_scraping': {
+        'task': 'post.tasks.start_scraping_beat',
+        'schedule': crontab(minute=3),
+    },
+}

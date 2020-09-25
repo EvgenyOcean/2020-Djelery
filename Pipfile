@@ -15,6 +15,7 @@ django-celery-results = "*"
 requests = "*"
 beautifulsoup4 = "*"
 lxml = "*"
+psycopg2 = "*"
 
 [requires]
 python_version = "3.8"

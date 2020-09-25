@@ -1,0 +1,68 @@
+version: '3.2'
+
+services: 
+  db:
+    restart: always
+    image: postgres
+    container_name: postick
+    environment:
+      - POSTGRES_USER=postgress
+      - POSTGRES_PASSWORD=postgress
+      - POSTGRES_DB=postgress
+      - POSTGRES_PORT=5432
+    volumes: 
+      - postgres_rulez:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbick
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+
+  web: &web
+    build: .
+    container_name: webick
+    volumes:
+      - djelery:/djelery
+    command: >
+      sh -c "./wait-for-it.sh db:5432 &&
+             python manage.py makemigrations posts &&
+             python manage.py makemigrations accounts &&
+             python manage.py migrate && 
+             python manage.py runserver 0.0.0.0:8888"
+    ports:
+      - "8888:8888"
+    depends_on: 
+      - celery_worker
+      - celery_beater
+      - db
+
+  celery_worker:
+    build: .
+    container_name: celerick
+    volumes:
+      # experimental to avoid chrome crashes
+      - /dev/shm:/dev/shm
+      - djelery:/djelery
+    command: celery -A dj_celery --autoscale=10,3 worker -l INFO
+    # ports: []
+    depends_on: 
+      - rabbitmq
+      - db
+
+  celery_beater:
+    build: .
+    container_name: beaterick
+    volumes:
+      - djelery:/djelery
+    command: celery -A dj_celery beat -l INFO
+    depends_on: 
+      - rabbitmq
+      - db
+
+volumes: 
+  djelery:
+  postgres_rulez:
