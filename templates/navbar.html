@@ -7,7 +7,9 @@
       </button>
       <div class="collapse navbar-collapse pt-1" id="datanav">
         <div class="navbar-nav">
-          <a class="nav-item nav-link" href="{% url 'feed' username=user.username %}">My Feed</a>
+          {% if user.username %}
+            <a class="nav-item nav-link" href="{% url 'feed' username=user.username %}">My Feed</a>
+          {% endif %}
         </div>
         <div class="navbar-nav ml-auto">
           {% if user.username %}
