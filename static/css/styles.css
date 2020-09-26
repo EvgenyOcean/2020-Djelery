@@ -13,6 +13,18 @@ body{
   background: var(--mainBg);
 }
 
+ul, ol{
+  padding: 2rem;
+}
+
+pre code{
+  font-size: inherit;
+  color: inherit;
+  word-break: normal;
+  color: white;
+  background: #000;
+}
+
 :root{
   --mainAqua: #00FFF0;
   --mainWhite: #fff;

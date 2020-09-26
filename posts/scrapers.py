@@ -1,7 +1,5 @@
 import time
-import json
 import os
-import requests
 
 from django.contrib.auth.models import User
 from django.db import IntegrityError
@@ -9,7 +7,6 @@ from .models import Post
 
 from accounts.utils import decrypt_pw_hash, generate_pw_hash
 
-from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
@@ -222,6 +219,27 @@ class VcScraper(MainScraper):
 
         return self.scrap_top(times=5, user_feed=True)
 
+    def scrap_article_content(self, post):
+        self.driver.get(self.path)
+        # page can be removed
+        try: 
+            content = WebDriverWait(self.driver, 5).until(EC.visibility_of_element_located((By.CLASS_NAME, "content--full")))
+            WebDriverWait(self.driver, 5).until(EC.presence_of_all_elements_located((By.CLASS_NAME, "l-island-a")))
+            javascript = ('arguments[0].querySelectorAll("figure").forEach(el => el.remove());' \
+                        'arguments[0].querySelectorAll("img").forEach(el => el.remove());' \
+                        'arguments[0].querySelectorAll("video").forEach(el => el.remove());' \
+                        'arguments[0].querySelectorAll("iframe").forEach(el => el.remove());' \
+                        'arguments[0].querySelectorAll("svg").forEach(el => el.remove());' \
+                        'document.querySelectorAll(".content--full > div").forEach(el => (el.querySelector("p") || el.querySelector("ul") || el.querySelector("h2") || el.querySelector("h3") || el.querySelector("ol")) ? undefined : el.remove());' \
+                        'arguments[0].querySelectorAll("script").forEach(el => el.remove());')
+            self.driver.execute_script(javascript, content)
+            content = content.get_attribute('innerHTML')
+            self.driver.quit()
+            post.full_content = content
+            post.save()
+            return content
+        except: 
+            return 'Something went wrong! Please, consider reading original article!'
 
 
 class HabrScraper(MainScraper):
@@ -342,5 +360,24 @@ class HabrScraper(MainScraper):
                         return str(err.__cause__)
                     # all the pages scraped, it's time for final serialization and then saving to the db
                     return self.serialize_articles(articles, saving=True)
-        
 
+    def scrap_article_content(self, post):
+        self.driver.get(self.path)
+        # page can be removed
+        try: 
+            content = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CLASS_NAME, "post__text")))
+            javascript = ('arguments[0].querySelectorAll("figure").forEach(el => el.remove());' \
+                          'arguments[0].querySelectorAll("img").forEach(el => el.remove());' \
+                          'arguments[0].querySelectorAll("video").forEach(el => el.remove());' \
+                          'arguments[0].querySelectorAll("iframe").forEach(el => el.remove());' \
+                          'arguments[0].querySelectorAll("svg").forEach(el => el.remove());' \
+                          'arguments[0].querySelectorAll(".spoiler").forEach(el => el.remove());' \
+                          'arguments[0].querySelectorAll("script").forEach(el => el.remove());')
+            self.driver.execute_script(javascript, content)
+            content = content.get_attribute('innerHTML')
+            self.driver.quit()
+            post.full_content = content
+            post.save()
+            return content
+        except: 
+            return 'Something went wrong! Please, consider reading original article!'

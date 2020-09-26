@@ -63,24 +63,15 @@ def get_full_content(post_id):
         return post.full_content
 
     link = post.link
+    source = post.source
 
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
-    }
+    if source =='habr':
+        scraper = HabrScraper(path=link)
+    
+    elif source == 'vc':
+        scraper = VcScraper(path=link)
 
-    try:
-        r = requests.get(link, headers=headers)
-        soup = BeautifulSoup(r.content, 'lxml')
-        content_strings = soup.find('article', class_='post').stripped_strings
-        content = " ".join(list(content_strings))
-        post.full_content = content
-        post.save()
-    except: 
-        # idk some articles just don't load right
-        # should go with selenium here as well as a back up option
-        return 'Something went wrong, please consider reading original article by clicking Read More'
-
-    return content
+    return scraper.scrap_article_content(post)
 
 @shared_task
 def start_scraping_beat():

@@ -39,12 +39,13 @@
             taskController(taskKeyName, taskId);
           }).catch(err => {console.log(err)})
         } else {
-          response.json().then(errData => { //here we don't return anything just go straigh for then, if 400 or whatever
+          response.json().then(errData => {
             console.log(errData);
           }).catch(err => {console.log(err)})
         }
       }).catch(err => {console.log('never here, but just in case!')});
-
+      // taskController should be in base.html and always looking for
+      // tasks and if there're any => do sth 
       function taskController(taskKeyName, taskId){
         let timeoutID = setTimeout(function tick(){
           console.log(taskId)
@@ -71,7 +72,7 @@
                   console.log('task is done, localStorage cleared, next: updating UI')
                   let contentDiv = document.querySelector('.content');
                   contentDiv.innerHTML = '';
-                  contentDiv.textContent = result;
+                  contentDiv.insertAdjacentHTML('afterbegin', result);
                   contentDiv.classList.remove('text-center');
                   contentDiv.classList.add('text-left');
                 }

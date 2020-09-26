@@ -71,7 +71,7 @@ def task_check(request):
         task_result = 'NOT DONE YET'
         if (task_status == 'SUCCESS'):
             task_result = task.get()
-        print(f'task_check is sending: status: {task_status}; result: {task_result}')
+        # print(f'task_check is sending: status: {task_status}; result: {task_result}')
     # database is locked, I assume it means that celery task is using the db
     # the question is whether this thing sqlite specific or postgresql may face it as well?
     except OperationalError as err:
