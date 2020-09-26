@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.db import OperationalError
 from django.contrib.auth.decorators import login_required
 from posts.models import Post
 from django.contrib.auth.models import User
@@ -13,6 +14,10 @@ from rest_framework.response import Response
 from djelery.celery import app
 from posts.tasks import user_scraping
 
+# WHAT IS GOING ON HERE:
+# 1. PROFILE 2. REGISTER PAGES
+# 2. API FOR USER FEED SCRAB (CUZ ITS USER-RELATED)
+# 3. API FOR TASK STATUS CHECK (CUZ ONLY USER-FEED UPDATING STATUS MATTERS YET)
 
 
 # Create your views here.
@@ -59,11 +64,16 @@ def task_check(request):
     AJAX requests to check the task status
     and accordingly update the UI
     '''
-    print(f'task_check got: {request.data["task_id"]}')
-    task = app.AsyncResult(request.data['task_id'])
-    task_status = task.status
-    task_result = 'NOT DONE YET'
-    if (task_status == 'SUCCESS'):
-        task_result = task.get()
-    print(f'task_check is sending: status: {task_status}; result: {task_result}')
+    try:
+        print(f'task_check got: {request.data["task_id"]}')
+        task = app.AsyncResult(request.data['task_id'])
+        task_status = task.status
+        task_result = 'NOT DONE YET'
+        if (task_status == 'SUCCESS'):
+            task_result = task.get()
+        print(f'task_check is sending: status: {task_status}; result: {task_result}')
+    # database is locked, I assume it means that celery task is using the db
+    # the question is whether this thing sqlite specific or postgresql may face it as well?
+    except OperationalError as err:
+        return Response({'status': 'PENDING', 'result': task_result}, status=status.HTTP_200_OK)
     return Response({'status': task_status, 'result': task_result}, status=status.HTTP_200_OK)

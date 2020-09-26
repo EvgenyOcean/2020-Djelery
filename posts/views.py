@@ -51,7 +51,8 @@ def feed(request, username):
 # EMULATING INITIAL SCRAPING
 def initial_scrap(request):
     # that's some sort of entrypoint for initial scraping
-    scrap_top_posts.delay()
+    scrap_top_posts.delay('habr')
+    scrap_top_posts.delay('vc')
     # IMPLEMENT USER NOTIFIER!
     return redirect(home)
     

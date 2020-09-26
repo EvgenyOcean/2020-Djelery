@@ -95,7 +95,17 @@
         linkA.classList.add('btn', 'btn-light');
         titleH5.textContent = piece.title;
         titleH5.setAttribute('href', '/posts/' + piece.id);
-        contentP.textContent = piece.content.slice(0, 700); 
+        if (piece.source === 'vc'){
+          let div = document.createElement('div');
+          div.insertAdjacentHTML('afterbegin', piece.content);
+          div.querySelectorAll("figure").forEach(el => el.remove());
+          div.querySelectorAll("img").forEach(el => el.remove());
+          div.querySelectorAll("video").forEach(el => el.remove());
+          div.querySelectorAll("script").forEach(el => el.remove());
+          contentP.append(div);
+        } else {
+          contentP.textContent = piece.content.slice(0, 700); 
+        }
         linkA.setAttribute('href', piece.link);
         linkA.innerText = 'Read Original';
 

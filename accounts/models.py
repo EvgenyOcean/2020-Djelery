@@ -7,7 +7,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     habr_email = models.EmailField(blank=True)
     habr_pass = models.CharField(max_length=250, blank=True)
-    vs_email = models.EmailField(blank=True)
+    vc_email = models.EmailField(blank=True)
     vc_pass = models.CharField(max_length=250, blank=True)
 
     def __str__(self):

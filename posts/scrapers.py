@@ -94,7 +94,7 @@ class MainScraper:
                     featured = 0,
                     source = self.source,
                 )
-                p.users.add(user)
+                p.users.add(self.user)
                 new_count += 1
 
             except IntegrityError as err:
@@ -139,25 +139,56 @@ class VcScraper(MainScraper):
     def __init__(self, path='https://vc.ru/', source='vc'):
         super().__init__(path, source)
 
-    def try_login(self):
-        pass
+    def try_login(self, password, mailname, username):
+        try:
+            self.driver.get(self.path)
+            # gettings to the email and password form
+            login_click = WebDriverWait(self.driver, 5).until(EC.element_to_be_clickable((By.CLASS_NAME, "site-header-user-login")))
+            login_click.click()
+            email_login = WebDriverWait(self.driver, 5).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-auth-target="signin-email"]')))
+            email_login.click()
 
-    def scrap_top(self, times=2):
+            email_field = WebDriverWait(self.driver, 5).until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[type="email"][name="login"]')))
+            email_field.send_keys(mailname)
+            pass_field = WebDriverWait(self.driver, 5).until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[type="password"][name="password"]')))
+            pass_field.send_keys(password)
+            pass_field.send_keys(Keys.RETURN)
+
+            WebDriverWait(self.driver, 5).until(EC.element_to_be_clickable((By.CLASS_NAME, 'site-header-user-profile')))
+
+            # save user credentials
+            try:
+                self.save_user_credintials(password, mailname, username)
+            except Exception as err:
+                return str(err.__cause__)
+
+        except Exception as err: 
+            # IMPLEMENT LOGGING
+            raise SigningInError('Credentials provided are incorrect! GG WP!')
+
+    def scrap_top(self, times=2, user_feed=False):
         '''
         They load 12 article per scroll point, so if times == 2
         We will get 24 article, 3 -> 36 and etc...
+        In this case scrap_top is also good for scraping feed
         '''
         self.driver.get(self.path)
         for i in range(0, times):
-            # I need to wait for articles to be rendered
-            articles = WebDriverWait(self.driver, 5).until(EC.visibility_of_all_elements_located((By.CLASS_NAME, "feed__item")))
-            self.serialize_articles(articles)
-            # delete existing articles => scroll a little => get new ones
-            self.driver.execute_script("document.querySelectorAll('.feed__item').forEach(el => el.remove()); window.scrollBy(0, 1500);")
-            # how to decline prev articles
+            try:
+                # I need to wait for articles to be rendered
+                articles = WebDriverWait(self.driver, 5).until(EC.visibility_of_all_elements_located((By.CLASS_NAME, "feed__item")))
+                self.serialize_articles(articles)
+                # delete existing articles => scroll a little => get new ones
+                self.driver.execute_script("document.querySelectorAll('.feed__item').forEach(el => el.remove()); window.scrollBy(0, 1500);")
+                # how to decline prev articles
+            except Exception as err:
+                return str(err.__cause__)
 
         self.driver.quit()
-        return self.save_top_articles()
+        if user_feed:
+            return self.save_users_articles()
+        else:
+            return self.save_top_articles()
 
     def serialize_articles(self, articles):
         for article in articles:
@@ -171,7 +202,6 @@ class VcScraper(MainScraper):
                 content = article.find_element_by_tag_name('p').get_attribute('innerHTML')
             except:
                 content = 'No subtitle for this article'
-            # i don't know what else to expect :)
             try:
                 link = article.find_element_by_class_name('content-feed__link').get_attribute('href')
             except:
@@ -183,8 +213,15 @@ class VcScraper(MainScraper):
                 'link': link,
             })
 
-    def scrap_feed(self, mailname, password):
-        pass
+    def scrap_feed(self, password, mailname, username):
+        try:
+            self.try_login(password, mailname, username)
+        except SigningInError as err:
+            # IMPLEMENT LOGGING HERE OR UPTHERE 
+            return str(err)
+
+        return self.scrap_top(times=5, user_feed=True)
+
 
 
 class HabrScraper(MainScraper):
@@ -278,7 +315,7 @@ class HabrScraper(MainScraper):
             self.try_login(password, mailname)
         except SigningInError as err:
             # IMPLEMENT LOGGING OR UPTHERE 
-            return err
+            return str(err)
         
         for i in range(1, pages+1):
             try:

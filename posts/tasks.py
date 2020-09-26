@@ -14,16 +14,21 @@ from .models import Post
 from celery import shared_task
 from accounts.utils import decrypt_pw_hash
 
-from .scrapers import HabrScraper
+from .scrapers import HabrScraper, VcScraper
 from bs4 import BeautifulSoup
 
 
 
 @shared_task
-def scrap_top_posts():
-    scraper = HabrScraper()
-    # IMPLEMENT LOGGING
-    return scraper.scrap_top()
+def scrap_top_posts(source):
+    if source == 'habr':
+        scraper = HabrScraper()
+        # IMPLEMENT LOGGING
+        return scraper.scrap_top()
+    elif source == 'vc':
+        scraper = VcScraper()
+        # IMPLEMENT LOGGING
+        return scraper.scrap_top()
 
 
 @shared_task
@@ -35,9 +40,14 @@ def user_scraping(password, mailname, source, username):
     if not source in ['habr', 'vc']: 
         # IMPLEMENT user notifier for this case
         return 'Source is not available'
+    result = ''
+    if source == 'habr':
+        scraper = HabrScraper(path='https://account.habr.com/login/')
+        result = scraper.scrap_feed(password, mailname, username)
+    elif source == 'vc':
+        scraper = VcScraper()
+        result = scraper.scrap_feed(password, mailname, username)
 
-    scraper = HabrScraper(path='https://account.habr.com/login/')
-    result = scraper.scrap_feed(password, mailname, username)
     return result
 
 
