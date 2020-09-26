@@ -9,7 +9,15 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
 from .serializers import PostsSerializer
 
-from .tasks import start_scraping, get_full_content
+from .tasks import scrap_top_posts, get_full_content
+
+# VIEWS I WANNA SEE HERE: 
+# home, detailed, feed are okay, cuz they render templates for three main pages
+
+# APIs I WANNA SEE HERE: 
+# get_featured_posts, get_users_post, get_content
+
+
 
 # User Feed Paginator
 def get_paginated_qs_response(qs, request):
@@ -42,7 +50,9 @@ def feed(request, username):
 
 # EMULATING INITIAL SCRAPING
 def initial_scrap(request):
-    start_scraping.delay()
+    # that's some sort of entrypoint for initial scraping
+    scrap_top_posts.delay()
+    # IMPLEMENT USER NOTIFIER!
     return redirect(home)
     
 

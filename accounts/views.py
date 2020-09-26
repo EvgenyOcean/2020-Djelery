@@ -11,7 +11,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
 from djelery.celery import app
-from .tasks import user_scraping
+from posts.tasks import user_scraping
 
 
 
@@ -39,20 +39,21 @@ def register(request):
 @permission_classes([IsAuthenticated])
 def verify_credentials(request):
     '''
-    Once user enters credential on profile page, it comes right here
+    Once user enters credentials on a profile page, it comes right here
     and parsing starts; if habr login successfull then 
     (mailname - is mail or username depending on a server)
     '''
     mailname = request.data['mailname']
     password = request.data['password']
+    # need to verify source
     source = request.data['source']
-    current_username = request.user.username
-    task = user_scraping.delay(mailname, password, source, current_username)
+    username = request.user.username
+    task = user_scraping.delay(password, mailname, source, username)
 
     return Response({"task_id": task.task_id}, status=status.HTTP_202_ACCEPTED)
 
 @api_view(["POST"])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 def task_check(request):
     '''
     AJAX requests to check the task status

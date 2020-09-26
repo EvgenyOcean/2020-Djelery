@@ -124,14 +124,23 @@
               <div class="alert alert-info">You feed is loading, once done, you will be redirected to view the posts! ;)</div>  
             </div>
           </div>`);
-      } else if (status === 'SUCCESS' && result === 'Done!'){
+      } else if (status === 'SUCCESS'){
         informer.remove();
         mainContainer.insertAdjacentHTML('afterbegin',
          `<div class="row mt-4 informer-peding">
             <div class="col-md-10 mx-auto">
-              <div class="alert alert-info">All posts are loaded you can check your feed. Next update will be in 24 hours!</div>  
+              <div class="alert alert-info" id='notifier'></div>  
             </div>
           </div>`);
+        console.log(result, status);
+        setTimeout(() => {
+          try {
+            let notifier = document.getElementById('notifier');
+            notifier.textContent = result;
+          } catch (error) {
+            console.log(error); 
+          }
+        }, 0);
       }
     }
 

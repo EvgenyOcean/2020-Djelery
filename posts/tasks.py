@@ -5,114 +5,41 @@ import json
 import os
 import requests
 
+
 # Create your tasks here
-# shared_task does not depend on a particular project
-# thus it's good for reusability
 from django.contrib.auth.models import User
 from django.db import IntegrityError
 from .models import Post
 
 from celery import shared_task
-from accounts.tasks import user_scraping
 from accounts.utils import decrypt_pw_hash
 
-### SCRAPING IMPORTS ###
-from datetime import datetime
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-
+from .scrapers import HabrScraper
 from bs4 import BeautifulSoup
-###// SCRAPING IMPORTS ###
 
 
-# later on, add can be called in any view funciton
-# with .delay() method
+
 @shared_task
-def start_scraping():
-    '''
-    To fill in the home page, take first 20 posts from habr
-    '''
-    # PATH = "C:\Program Files (x86)\chromedriver.exe"
-    PATH = '/usr/local/bin/chromedriver'
-    chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_argument('--no-sandbox')
-    chrome_options.add_argument('--window-size=1920x1080')
-    chrome_options.add_argument('--headless')
-    chrome_options.add_argument('--disable-gpu')
-
-    driver = webdriver.Chrome(chrome_options=chrome_options, executable_path=PATH)
+def scrap_top_posts():
+    scraper = HabrScraper()
+    # IMPLEMENT LOGGING
+    return scraper.scrap_top()
 
 
-    driver.get("https://habr.com/ru/top/")
-
-
-    article_els = driver.find_elements_by_tag_name('article')
-    print(f'I found {len(article_els)} articles!')
-    an = driver.execute_script('return document.getElementsByTagName("article").length')
-    print(f'Js found {an} articles')
-    parse_received_data(article_els, 1)
-    driver.quit()
-    return 'Take it sloooww! Quite literally lol!'
-
-# do i need to use shared task inhere?
 @shared_task
-def parse_received_data(article_els, featured):
+def user_scraping(password, mailname, source, username):
     '''
-    To parse data into the dict
+    Gets data to enter the server; + server; + username
+    Then runs the browser and parses the feed
     '''
-    articles = []
+    if not source in ['habr', 'vc']: 
+        # IMPLEMENT user notifier for this case
+        return 'Source is not available'
 
-    print('Parsing received data...')
-    for article in article_els:
-        header = article.find_element_by_tag_name('h2').find_element_by_tag_name('a').text
-        content = article.find_element_by_tag_name('div').find_element_by_class_name('post__text').text
-        link = article.find_element_by_tag_name('h2').find_element_by_tag_name('a').get_attribute('href')
-        
-        # it appears to be working
-        content.replace('/n', ' ')
-    
-        # here you should go with your db
-        articles.append({
-            "title": header,
-            "content": content,
-            "link": link
-        })
+    scraper = HabrScraper(path='https://account.habr.com/login/')
+    result = scraper.scrap_feed(password, mailname, username)
+    return result
 
-    return save_results_db(articles, featured)
-
-# do i need to use shared task inhere?
-@shared_task
-def save_results_db(articles, featured):
-    '''
-    Saves the articles into the db
-    '''
-    print('starting saving')
-    new_count = 0
-
-    for article in articles:
-        try:
-            Post.objects.create(
-                title = article['title'],
-                content = article['content'],
-                link = article['link'],
-                featured = featured,
-                source = 'habr',
-            )
-            new_count += 1
-
-        except IntegrityError as err:
-            article = Post.objects.filter(link=article['link']).first()
-            article.featured = True
-            article.save()
-
-        except Exception as e:
-            print('Something went wrong, see error below')
-            print(e)
-
-    return print(f'found {new_count} new articles')
 
 @shared_task
 def get_full_content(post_id):
@@ -165,7 +92,7 @@ def start_scraping_beat():
             # print(password, mailname, source, current_username)
             user_scraping.delay(mailname, password, source, current_username)
         if user.profile.vc_pass:
-            # start vs scraping
+            # start vc scraping
             pass
 
     return 'Main Beat finished, waiting for subtasks'
