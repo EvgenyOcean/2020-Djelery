@@ -17,7 +17,7 @@
         <div class="col-md-8 content">Please, wait. Posts are loading.</div>
         <div class="col-md-3 ml-auto left-side">
           <div class="scrap-option option-active" data-source='habr'>Habr</div>
-          <div class="scrap-option" data-source='vc'>VC</div>
+          <div class="scrap-option option-active" data-source='vc'>VC</div>
           <button class="update-btn" role="button">Update</button>
         </div>
       </div>
@@ -38,6 +38,7 @@
   </main>
 
   <script>
+    lookForUnresolvedTasks();
     let username = document.querySelector('[data-username]').dataset['username'];
     function fetch_users_post(path, sources=['habr', 'vc']){
       console.log(path);
@@ -132,31 +133,6 @@
 
 
     // SOME UTILS FUNCTIONS
-    function create_html(data){
-      let mainEl = document.body.querySelector('.content');
-      mainEl.innerHTML = '';
-      for (let piece of data){
-        let mediaDiv = document.createElement('div');
-        let mediaBodyDiv = document.createElement('div');
-        let titleH5 = document.createElement('a');
-        let contentP = document.createElement('p');
-        let linkA = document.createElement('a');
-        mediaDiv.classList.add('media', 'mb-4');
-        mediaBodyDiv.classList.add('media-body', 'p-2', 'text-white');
-        titleH5.classList.add('mb-2');
-        contentP.classList.add('mb-2');
-        linkA.classList.add('btn', 'btn-light');
-        titleH5.textContent = piece.title;
-        titleH5.setAttribute('href', '/posts/' + piece.id);
-        contentP.textContent = piece.content.slice(0, 700); 
-        linkA.setAttribute('href', piece.link);
-        linkA.innerText = 'Read Original';
-
-        mediaBodyDiv.append(titleH5, contentP, linkA)
-        mediaDiv.append(mediaBodyDiv);
-        mainEl.append(mediaDiv);
-      }
-    }
 
     function getCookie(name) {
       let cookieValue = null;

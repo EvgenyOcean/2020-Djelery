@@ -25,13 +25,14 @@
             (CUZ NORMAL FETCHING SHOULD BE ONCE IN 24HRS)
             BUT FOR TESTING PURPOSES I'LL LEAVE IT AS IT IS
           -->
-          <button class="fetch-btn" role="button">Fetch Top Posts</button>
+          <button class="fetch-btn" role="button">Scrap Top Posts</button>
         </div>
       </div>
     </div>
   </main>
 
   <script>
+    lookForUnresolvedTasks();
     // I need to run ajax request to /api/posts/featured/
     function fetch_featured_posts(sources=['habr']){
       console.log(sources);
@@ -104,110 +105,6 @@
 
     let sourcesDiv = document.body.querySelector('.left-side');
     sourcesDiv.onclick = handleSourcesClick;
-
-    function taskController(taskKeyName, taskId){
-      let timeoutID = setTimeout(function tick(){
-        console.log(taskId)
-        fetch('/api/accounts/task_check/', {
-          method: "POST",
-          headers: {
-            'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest',
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRFToken': getCookie('csrftoken'),
-            'Content-Type': 'application/json',
-          }, 
-          body: JSON.stringify({"task_id": taskId})
-        }).then(response => {
-          if (response.ok){ 
-            response.json().then(data => {
-              status = data['status'];
-              result = data['result'];
-              if (status === 'PENDING'){
-                setTimeout(tick, 5000);
-                console.log('task is pending, do nothing with the UI')
-              } else {
-                clearTimeout(timeoutID);
-                localStorage.removeItem(taskKeyName);
-                console.log('task is done, localStorage cleared, next: updating UI')
-                updateUiWithTaskResult(status, result);
-              }
-            }).catch(err => {console.log(err)})
-          } else {
-            response.json().then(errData => { 
-              console.log(errData);
-            }).catch(err => {console.log(err)})
-          }
-        }).catch(err => {console.log('never here, but just in case!')});
-      }, 5000)
-    }
-
-    function updateUiWithTaskResult(status, result="NOT DONE YET"){
-      let mainContainer = document.querySelector('main .container');
-      let informer = mainContainer.querySelector('.informer-peding');
-      if (status === 'PENDING'){
-        if (informer) return;
-        mainContainer.insertAdjacentHTML('afterbegin',
-         `<div class="row mt-4 informer-peding">
-            <div class="col-md-10 mx-auto">
-              <div class="alert alert-info">The posts are scraping. Once done, cannot be undone :)</div>  
-            </div>
-          </div>`);
-      } else if (status === 'SUCCESS'){
-        informer.remove();
-        mainContainer.insertAdjacentHTML('afterbegin',
-         `<div class="row mt-4 informer-peding">
-            <div class="col-md-10 mx-auto">
-              <div class="alert alert-info" id='notifier'></div>  
-            </div>
-          </div>`);
-        console.log(result, status);
-        setTimeout(() => {
-          try {
-            let notifier = document.getElementById('notifier');
-            notifier.textContent = result;
-          } catch (error) {
-            console.log(error); 
-          }
-        }, 0);
-      }
-    }
-
-    // SOME UTILS FUNCTIONS
-    function create_html(data){
-      let mainEl = document.body.querySelector('.content');
-      mainEl.innerHTML = '';
-      for (let piece of data){
-        let mediaDiv = document.createElement('div');
-        let mediaBodyDiv = document.createElement('div');
-        let titleH5 = document.createElement('a');
-        let contentP = document.createElement('p');
-        let linkA = document.createElement('a');
-        mediaDiv.classList.add('media', 'mb-4');
-        mediaBodyDiv.classList.add('media-body', 'p-2', 'text-white');
-        titleH5.classList.add('mb-2');
-        contentP.classList.add('mb-2');
-        linkA.classList.add('btn', 'btn-light');
-        titleH5.textContent = piece.title;
-        titleH5.setAttribute('href', '/posts/' + piece.id);
-        if (piece.source === 'vc'){
-          let div = document.createElement('div');
-          div.insertAdjacentHTML('afterbegin', piece.content);
-          div.querySelectorAll("figure").forEach(el => el.remove());
-          div.querySelectorAll("img").forEach(el => el.remove());
-          div.querySelectorAll("video").forEach(el => el.remove());
-          div.querySelectorAll("script").forEach(el => el.remove());
-          contentP.append(div);
-        } else {
-          contentP.textContent = piece.content.slice(0, 700); 
-        }
-        linkA.setAttribute('href', piece.link);
-        linkA.innerText = 'Read Original';
-
-        mediaBodyDiv.append(titleH5, contentP, linkA)
-        mediaDiv.append(mediaBodyDiv);
-        mainEl.append(mediaDiv);
-      }
-    }
 
     function getCookie(name) {
       let cookieValue = null;
