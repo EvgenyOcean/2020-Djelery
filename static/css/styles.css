@@ -13,6 +13,7 @@ body{
   background: var(--mainBg);
 }
 
+/* that's really dangerous */
 ul, ol{
   padding: 2rem;
 }
@@ -44,6 +45,10 @@ pre code{
 
 .nav-link{
   color: var(--mainAqua) !important;
+}
+
+.media-body{
+  word-break: break-word;
 }
 
 /* HOME SECTON */
@@ -132,4 +137,16 @@ pre code{
   background-color: #00FF75!important;
   color: var(--mainBg);
   text-transform: uppercase;
+}
+
+.how-it-works{
+  color: lightgray;
+  margin: 0;
+  background-color: rgba(0,0,0,0.2);
+  margin-bottom: 1rem;
+}
+
+.how-it-works li{
+  margin: 0;
+  padding: 0;
 }
