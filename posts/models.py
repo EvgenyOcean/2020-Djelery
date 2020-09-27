@@ -14,7 +14,11 @@ class Post(models.Model):
     source = models.CharField(max_length=25)
     featured = models.BooleanField(default=False)
     users = models.ManyToManyField(User, related_name='posts', null=True, blank=True)
+    date_fetched = models.DateTimeField(auto_now_add=True)
     objects = PostsManager()
+
+    class Meta:
+        ordering = ["date_fetched"]
 
     def __str__(self):
         return self.title

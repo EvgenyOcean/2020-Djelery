@@ -49,12 +49,15 @@ def feed(request, username):
     return render(request, 'posts/feed.html', {'posts': users_post})
 
 # EMULATING INITIAL SCRAPING
+# JUST FOR TESTING PURPOSES
+# CUZ TOP POSTS SCRAPING MUST BE RUN ACCRORDING TO THE SCHEDULE!
+@api_view(['GET'])
 def initial_scrap(request):
     # that's some sort of entrypoint for initial scraping
-    scrap_top_posts.delay('habr')
-    scrap_top_posts.delay('vc')
+    task = scrap_top_posts.delay('habr')
+    task2 = scrap_top_posts.delay('vc')
     # IMPLEMENT USER NOTIFIER!
-    return redirect(home)
+    return Response({'task_id': [task.task_id, task2.task_id]}, status=status.HTTP_200_OK)
     
 
 

@@ -64,7 +64,7 @@
         if (response.ok){ 
           response.json().then(data => {
             let taskId = data['task_id'];
-            taskKeyName = 'task' + taskId.slice(0,8);
+            let taskKeyName = 'task' + taskId.slice(0,8);
             localStorage.setItem(taskKeyName, taskId);
             taskController(taskKeyName, taskId);
             updateUiWithTaskResult('PENDING')

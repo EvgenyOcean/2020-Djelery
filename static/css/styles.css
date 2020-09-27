@@ -85,7 +85,8 @@ pre code{
   background-color: rgba(39, 134, 163, 0.37);
 }
 
-.update-btn{
+.update-btn,
+.fetch-btn{
   background-color: var(--mainAqua);
   border-radius: 5px;
   padding: 0.3em 0.5em;
@@ -96,9 +97,21 @@ pre code{
   font-size: 1.5rem;
 }
 
+.fetch-btn{
+  background-color: darkred;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  margin-top: 0.2rem;
+}
+
 .update-btn:hover{
   background-color: greenyellow;
 }
+
+.fetch-btn:hover{
+  background-color: red;
+}
+
 
 /* PROFILE */
 .greetings, 

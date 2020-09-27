@@ -18,13 +18,13 @@ class SigningInError(Exception):
     
 
 class MainScraper:
-    def __init__(self, path, source, user=''):
+    def __init__(self, path, source):
         self.path = path
         self.source = source
         self.articles_list = []
         self.loop = 1
         self._PATH = "C:\Program Files (x86)\chromedriver.exe"
-        self.user = user
+        self.user = ''
         # self._PATH = "/usr/local/bin/chromedriver"
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument('--no-sandbox')
@@ -247,7 +247,7 @@ class HabrScraper(MainScraper):
         super().__init__(path, source)
 
 
-    def try_login(self, password, mailname):
+    def try_login(self, password, mailname, username):
         self.driver.get("https://account.habr.com/login/")
         email = self.driver.find_element_by_name('email')
         email.send_keys(mailname)
@@ -274,6 +274,12 @@ class HabrScraper(MainScraper):
             # IMPLEMENT LOGGING
             raise SigningInError('Credentials provided are incorrect! GG WP!')
 
+        try:
+            self.save_user_credintials(password, mailname, username)
+        except Exception as err:
+            raise SigningInError(str(err.__cause__)) 
+
+        
         return 'OK'
 
     def scrap_top(self, pages=1):
@@ -330,7 +336,7 @@ class HabrScraper(MainScraper):
         
     def scrap_feed(self, password, mailname, username, pages=3):
         try:
-            self.try_login(password, mailname)
+            self.try_login(password, mailname, username)
         except SigningInError as err:
             # IMPLEMENT LOGGING OR UPTHERE 
             return str(err)
@@ -342,10 +348,6 @@ class HabrScraper(MainScraper):
                 self.driver.get(url)
                 articles = WebDriverWait(self.driver, 10).until(EC.visibility_of_all_elements_located((By.TAG_NAME, "article")))
                 if i == pages:
-                    try:
-                        self.save_user_credintials(password, mailname, username)
-                    except Exception as err:
-                        return str(err.__cause__)
                     # all the pages scraped, it's time for final serialization and then saving to the db
                     return self.serialize_articles(articles, saving=True)
                 self.serialize_articles(articles)
@@ -354,10 +356,6 @@ class HabrScraper(MainScraper):
                 # A little bit of RY
                 if i == pages:
                     articles = []
-                    try:
-                        self.save_user_credintials(password, mailname, username)
-                    except Exception as err:
-                        return str(err.__cause__)
                     # all the pages scraped, it's time for final serialization and then saving to the db
                     return self.serialize_articles(articles, saving=True)
 
