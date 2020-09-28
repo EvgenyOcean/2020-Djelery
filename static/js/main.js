@@ -5,7 +5,6 @@
 // and displays it to the user whatever page he is on
 // should run once DomContentLoaded
 function lookForUnresolvedTasks(){
-  console.log('checking for unresolved tasks...');
   for (let i=0; i<localStorage.length; i++){
     let current = localStorage.key(i);
     if (current.includes('task')){
@@ -17,7 +16,6 @@ function lookForUnresolvedTasks(){
 
 function taskController(taskKeyName, taskId){
   let timeoutID = setTimeout(function tick(){
-    console.log(taskId)
     fetch('/api/accounts/task_check/', {
       method: "POST",
       headers: {
@@ -34,11 +32,9 @@ function taskController(taskKeyName, taskId){
           result = data['result'];
           if (status === 'PENDING'){
             setTimeout(tick, 5000);
-            console.log('task is pending, do nothing with the UI')
           } else {
             clearTimeout(timeoutID);
             localStorage.removeItem(taskKeyName);
-            console.log('task is done, localStorage cleared, next: updating UI')
             updateUiWithTaskResult(status, result);
           }
         }).catch(err => {console.log(err)})
@@ -53,7 +49,6 @@ function taskController(taskKeyName, taskId){
 
 function detailedTaskController(taskKeyName, taskId){
   let timeoutID = setTimeout(function tick(){
-    console.log(taskId)
     fetch('/api/accounts/task_check/', {
       method: "POST",
       headers: {
@@ -70,16 +65,16 @@ function detailedTaskController(taskKeyName, taskId){
           result = data['result'];
           if (status === 'PENDING'){
             setTimeout(tick, 5000);
-            console.log('task is pending, do nothing with the UI')
           } else {
             clearTimeout(timeoutID);
             localStorage.removeItem(taskKeyName);
-            console.log('task is done, localStorage cleared, next: updating UI')
             let contentDiv = document.querySelector('.content');
             contentDiv.innerHTML = '';
             contentDiv.insertAdjacentHTML('afterbegin', result);
             contentDiv.classList.remove('text-center');
             contentDiv.classList.add('text-left');
+            document.querySelectorAll('.content div').forEach(div => div.removeAttribute('style'));
+            document.querySelectorAll('br + br').forEach(br => br.remove());
           }
         }).catch(err => {console.log(err)})
       } else {
@@ -102,12 +97,11 @@ function updateUiWithTaskResult(status, result="NOT DONE YET"){
     mainContainer.insertAdjacentHTML('afterbegin',
      `<div class="row mt-4 informer-peding">
         <div class="col-md-12 px-0 mx-auto">
-          <div class="alert alert-primary">You feed is loading, once done, you will be redirected to view the posts! ;)</div>  
+          <div class="alert alert-primary">You feed is loading, once done, you will get notified! ;)</div>  
         </div>
       </div>`);
   } else if (status === 'SUCCESS'){
     if (informer){
-      console.log('informer is here')
       informer.remove();
     }
     mainContainer.insertAdjacentHTML('afterbegin',
@@ -116,10 +110,15 @@ function updateUiWithTaskResult(status, result="NOT DONE YET"){
           <div class="alert alert-primary" id='notifier'></div>  
         </div>
       </div>`);
-    console.log(result, status);
     setTimeout(() => {
       try {
         let notifier = document.getElementById('notifier');
+        if (result.length > 100){
+          // meaning you probably scraped the article full content before
+          // and you don't want your page to be ruined
+          notifier.textContent = 'Your article\'s full content has been scraped!';
+          return;
+        }
         notifier.textContent = result;
       } catch (error) {
         console.log(error); 

@@ -41,7 +41,6 @@
     lookForUnresolvedTasks();
     let username = document.querySelector('[data-username]').dataset['username'];
     function fetch_users_post(path, sources=['habr', 'vc']){
-      console.log(path);
       if (!path){
         path = '/api/posts/user-posts/';
       } else {
@@ -67,7 +66,6 @@
       }).then(response => {
         if (response.ok){ 
           response.json().then(data => {
-            console.log(data);
             let next = data.next;
             let prev = data.previous;
             let nextEl = document.querySelector('.next');
@@ -119,7 +117,6 @@
       let target = e.target;
       // time to update with new sources
       if (target.classList.contains('update-btn')){
-        console.log('update btn has been clicked');
         let sources = document.getElementsByClassName('option-active');
         sources = Array.from(sources);
         fetch_users_post(null, sources.map(el => el.dataset['source']));

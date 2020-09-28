@@ -33,7 +33,6 @@
       }).then(response => {
         if (response.ok){ 
           response.json().then(data => {
-            console.log(data);
             let taskId = data['task_id'];
             taskKeyName = 'task' + taskId.slice(0,8);
             localStorage.setItem(taskKeyName, taskId);

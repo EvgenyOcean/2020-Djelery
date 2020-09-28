@@ -35,7 +35,6 @@
     lookForUnresolvedTasks();
     // I need to run ajax request to /api/posts/featured/
     function fetch_featured_posts(sources=['habr']){
-      console.log(sources);
       if (sources.length === 0){
         let mainEl = document.body.querySelector('.content');
         mainEl.innerHTML = '';
@@ -54,7 +53,6 @@
       }).then(response => {
         if (response.ok){ 
           response.json().then(data => {
-            console.log(data);
             create_html(data);
           }).catch(err => {console.log(err)})
         } else {
@@ -73,7 +71,6 @@
       let target = e.target;
       // time to update with new sources
       if (target.classList.contains('update-btn')){
-        console.log('update btn has been clicked');
         let sources = document.getElementsByClassName('option-active');
         sources = Array.from(sources);
         fetch_featured_posts(sources.map(el => el.dataset['source']));

@@ -23,12 +23,12 @@ class MainScraper:
         self.source = source
         self.articles_list = []
         self.loop = 1
-        self._PATH = "C:\Program Files (x86)\chromedriver.exe"
+        # self._PATH = "C:\Program Files (x86)\chromedriver.exe"
+        self._PATH = "/usr/local/bin/chromedriver"
         self.user = ''
-        # self._PATH = "/usr/local/bin/chromedriver"
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument('--no-sandbox')
-        # chrome_options.add_argument('--headless')
+        chrome_options.add_argument('--headless')
         chrome_options.add_argument('--window-size=1920x1080')
         chrome_options.add_argument('--disable-gpu')
         # ARE YOU SURE YOU WANNA START THE BROWSER RIGHT HERE?

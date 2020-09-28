@@ -82,18 +82,22 @@ def start_scraping_beat():
     # cuz if services grow, then ifs will grow as well
     users = User.objects.all()
     for user in users:
-        # I need to find if user has vc and habr credentials 
+        print('Scraping for a specific user now!')
+        # start habr scraping
+        username = user.username
+
         if user.profile.habr_pass:
-            print('Scraping for a specific user now!')
-            # start habr scraping
             mailname = user.profile.habr_email
             password = decrypt_pw_hash(user.profile.habr_pass)
             source = 'habr'
-            current_username = user.username
-            # print(password, mailname, source, current_username)
-            user_scraping.delay(mailname, password, source, current_username)
-        if user.profile.vc_pass:
-            # start vc scraping
-            pass
 
-    return 'Main Beat finished, waiting for subtasks'
+            return user_scraping.delay(password, mailname, source, username)
+
+        if user.profile.vc_pass:
+            mailname = user.profile.vc_email
+            password = decrypt_pw_hash(user.profile.vc_pass)
+            source = 'vc'
+
+            return user_scraping.delay(password, mailname, source, username)
+
+    return 'Main task finished, waiting for subtasks'
