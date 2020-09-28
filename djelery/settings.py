@@ -155,6 +155,6 @@ CELERY_CACHE_BACKEND = 'django-cache'
 CELERY_BEAT_SCHEDULE = {
     'start_scraping': {
         'task': 'posts.tasks.start_scraping_beat',
-        'schedule': crontab(),
+        'schedule': crontab(minute='*/5'),
     },
 }
